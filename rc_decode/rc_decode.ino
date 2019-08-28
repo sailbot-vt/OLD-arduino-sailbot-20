@@ -1,3 +1,4 @@
+#include "rc_decode.h"
 
 // Trim struct
 interruptStruct *trimStruct = (interruptStruct *)malloc(sizeof(interruptStruct));
@@ -5,14 +6,26 @@ interruptStruct *trimStruct = (interruptStruct *)malloc(sizeof(interruptStruct))
 // Rudder struct
 interruptStruct *rudderStruct = (interruptStruct *)malloc(sizeof(interruptStruct));
 
-float scaleTrimOutptut(float dutyCycle) {
-    
-    return (dutyCycle - 5.49) * 0.49315;        // Scales voltage to scale from 0 - 1.8V (scale factor determined by testing)
+float scaleTrimOutput(float dutyCycle) {
+
+    float trimmedOutput = (dutyCycle - 4.64) * 0.43584;
+    if (trimmedOutput < 0) {
+        trimmedOutput = 0;
+    }
+    if (trimmedOutput >= 0.855 & trimmedOutput <= 0.87) {
+        trimmedOutput = 0.90;     // Crappy fix to hardware tendency to get stuck at 0.86 V in middle of knob swing
+    }
+    return trimmedOutput;        // Scales voltage to scale from 0 - 1.8V (scale factor determined by testing)
 }
 
 float scaleRudderOutput(float dutyCycle) {
 
-    return (dutyCycle - 5.49) * 0.52326;
+    float trimmedOutput = (dutyCycle - 5.29) * 0.49451;
+
+    if (trimmedOutput < 0) {
+      trimmedOutput = 0;
+    }
+    return trimmedOutput;
 }
 
 void trimPinInterrupt(void) {
@@ -28,7 +41,7 @@ void trimPinInterrupt(void) {
         trimStruct->dutyCycle = 100.0 * (float)onTime / (float)totalTime;
         trimStruct->riseTime = trimStruct->lastRead;
 
-        analogWrite(TRIMOUTPUT, scaleTrimOutput(trimStruct->dutyCycle);
+        analogWrite(TRIMOUTPUT, scaleTrimOutput(trimStruct->dutyCycle));
 
     }
 }
@@ -46,7 +59,7 @@ void rudderPinInterrupt(void) {
         rudderStruct->dutyCycle = 100.0 * (float)onTime / (float)totalTime;                       // Compute duty cycle
         rudderStruct->riseTime = rudderStruct->lastRead;                            // Store rising edge time
 
-        analogWrite(RUDDEROUTPUT, scaleRudderOutput(rudderStruct->dutyCycle);        
+        analogWrite(RUDDEROUTPUT, scaleRudderOutput(rudderStruct->dutyCycle));        
     }
 }
 

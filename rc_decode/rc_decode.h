@@ -3,13 +3,13 @@
 #define TRIMPIN A0
 #define RUDDERPIN A1
 
-#define TRIMOUTPUT D2
-#define RUDDEROUTPUT D3
+#define TRIMOUTPUT 2
+#define RUDDEROUTPUT 3
 
-#define TRIMMIN 5.49
-#define TRIMMAX 9.14
+#define TRIMMIN 4.64
+#define TRIMMAX 8.77
 
-#define RUDDERMIN 5.49
+#define RUDDERMIN 5.29
 #define RUDDERMAX 8.93
 
 // Interrupt struct
