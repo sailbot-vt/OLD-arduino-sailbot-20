@@ -3,6 +3,9 @@
 #define TRIMPIN A0
 #define RUDDERPIN A1
 
+#define TRIMOUTPUT D2
+#define RUDDEROUTPUT D3
+
 #define TRIMMIN 5.49
 #define TRIMMAX 9.14
 

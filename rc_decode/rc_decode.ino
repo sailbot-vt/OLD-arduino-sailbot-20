@@ -5,6 +5,16 @@ interruptStruct *trimStruct = (interruptStruct *)malloc(sizeof(interruptStruct))
 // Rudder struct
 interruptStruct *rudderStruct = (interruptStruct *)malloc(sizeof(interruptStruct));
 
+float scaleTrimOutptut(float dutyCycle) {
+    
+    return (dutyCycle - 5.49) * 0.49315;        // Scales voltage to scale from 0 - 1.8V (scale factor determined by testing)
+}
+
+float scaleRudderOutput(float dutyCycle) {
+
+    return (dutyCycle - 5.49) * 0.52326;
+}
+
 void trimPinInterrupt(void) {
     
     trimStruct->lastRead = micros();        // Get current time
@@ -18,7 +28,7 @@ void trimPinInterrupt(void) {
         trimStruct->dutyCycle = 100.0 * (float)onTime / (float)totalTime;
         trimStruct->riseTime = trimStruct->lastRead;
 
-    //    Serial.println(trimStruct->dutyCycle);
+        analogWrite(TRIMOUTPUT, scaleTrimOutput(trimStruct->dutyCycle);
 
     }
 }
@@ -36,7 +46,7 @@ void rudderPinInterrupt(void) {
         rudderStruct->dutyCycle = 100.0 * (float)onTime / (float)totalTime;                       // Compute duty cycle
         rudderStruct->riseTime = rudderStruct->lastRead;                            // Store rising edge time
 
-         Serial.println(rudderStruct->dutyCycle);
+        analogWrite(RUDDEROUTPUT, scaleRudderOutput(rudderStruct->dutyCycle);        
     }
 }
 
@@ -44,9 +54,13 @@ void setup(void) {
     // Start serial connection
     Serial.begin(115200); 
    
-    // Set trim and rudder pins to input
+    // Set trim and rudder inputs to input
     pinMode(TRIMPIN, INPUT);
     pinMode(RUDDERPIN, INPUT);
+
+    // Set trim and rudder output pins to output
+    pinMode(TRIMOUTPUT, OUTPUT);
+    pinMode(RUDDEROUTPUT, OUTPUT); 
 
     // Attach interrupt functions to change in pins
     PCintPort::attachInterrupt(TRIMPIN, trimPinInterrupt, CHANGE);
