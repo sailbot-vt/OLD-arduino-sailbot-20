@@ -8,22 +8,28 @@ interruptStruct *rudderStruct = (interruptStruct *)malloc(sizeof(interruptStruct
 
 float scaleTrimOutput(float dutyCycle) {
 
-    float trimmedOutput = (dutyCycle - 4.64) * 0.43584;
+    float trimmedOutput = ((dutyCycle - TRIMMIN) / TRIMRANGE) * (1.8/5) * 255;
     if (trimmedOutput < 0) {
         trimmedOutput = 0;
     }
-    if (trimmedOutput >= 0.855 & trimmedOutput <= 0.87) {
+    else if (trimmedOutput > 91.8) {
+       trimmedOutput = 91.8;
+    }
+    else if (trimmedOutput >= 43.5 & trimmedOutput <= 43.7) {
         trimmedOutput = 0.90;     // Crappy fix to hardware tendency to get stuck at 0.86 V in middle of knob swing
     }
     return trimmedOutput;        // Scales voltage to scale from 0 - 1.8V (scale factor determined by testing)
 }
 
 float scaleRudderOutput(float dutyCycle) {
-
-    float trimmedOutput = (dutyCycle - 5.29) * 0.49451;
+  
+    float trimmedOutput = ((dutyCycle - RUDDERMIN) / RUDDERRANGE) * (1.8/5) * 255;
 
     if (trimmedOutput < 0) {
       trimmedOutput = 0;
+    }
+    else if (trimmedOutput > 91.8) {
+       trimmedOutput = 91.8;
     }
     return trimmedOutput;
 }
@@ -58,6 +64,8 @@ void rudderPinInterrupt(void) {
         unsigned long onTime = rudderStruct->fallTime - rudderStruct->riseTime;     // Get on time
         rudderStruct->dutyCycle = 100.0 * (float)onTime / (float)totalTime;                       // Compute duty cycle
         rudderStruct->riseTime = rudderStruct->lastRead;                            // Store rising edge time
+
+        Serial.println(scaleRudderOutput(rudderStruct->dutyCycle));
 
         analogWrite(RUDDEROUTPUT, scaleRudderOutput(rudderStruct->dutyCycle));        
     }

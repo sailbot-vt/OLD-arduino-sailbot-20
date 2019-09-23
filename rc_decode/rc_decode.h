@@ -8,9 +8,12 @@
 
 #define TRIMMIN 4.64
 #define TRIMMAX 8.77
+#define TRIMRANGE 4.13
 
 #define RUDDERMIN 5.29
 #define RUDDERMAX 8.93
+#define RUDDERRANGE 3.64
+
 
 // Interrupt struct
 
