@@ -47,8 +47,7 @@ void trimPinInterrupt(void) {
         trimStruct->dutyCycle = 100.0 * (float)onTime / (float)totalTime;
         trimStruct->riseTime = trimStruct->lastRead;
 
-        analogWrite(TRIMOUTPUT, scaleTrimOutput(trimStruct->dutyCycle));
-
+        Serial.println(scaleTrimOutput(trimStruct->dutyCycle));
     }
 }
         
@@ -66,8 +65,6 @@ void rudderPinInterrupt(void) {
         rudderStruct->riseTime = rudderStruct->lastRead;                            // Store rising edge time
 
         Serial.println(scaleRudderOutput(rudderStruct->dutyCycle));
-
-        analogWrite(RUDDEROUTPUT, scaleRudderOutput(rudderStruct->dutyCycle));        
     }
 }
 
@@ -78,10 +75,6 @@ void setup(void) {
     // Set trim and rudder inputs to input
     pinMode(TRIMPIN, INPUT);
     pinMode(RUDDERPIN, INPUT);
-
-    // Set trim and rudder output pins to output
-    pinMode(TRIMOUTPUT, OUTPUT);
-    pinMode(RUDDEROUTPUT, OUTPUT); 
 
     // Attach interrupt functions to change in pins
     PCintPort::attachInterrupt(TRIMPIN, trimPinInterrupt, CHANGE);
