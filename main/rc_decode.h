@@ -1,5 +1,3 @@
-#include "PinChangeInt.h"
-
 #define TRIMPIN A0
 #define RUDDERPIN A1
 
@@ -16,13 +14,29 @@
 
 
 // Interrupt struct
-
 struct interruptStruct {
   volatile unsigned long fallTime = 0;       // Microsecond time of last falling edge
   volatile unsigned long riseTime = 0;       // Microsecond time of last rising edge
   volatile float dutyCycle = 0;               // Duty Cycle %
   volatile unsigned long lastRead = 0;        // Last interrupt time
 };
+
+class RCDecode {
+    public:
+
+        RCDecode();
+
+        float getScaledTrimOutput();
+        float getScaledRudderOutput();
+
+        static void trimPinInterrupt();
+        static void rudderPinInterrupt();
+
+    private:
+        interruptStruct *trimStruct;
+        interruptStruct *rudderStruct;
+};
+        
 
 /**
    pinout !

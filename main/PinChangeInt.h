@@ -1,3 +1,5 @@
+#pragma once
+
 // This file is part of the PinChangeInt library for the Arduino.  This library will work on any ATmega328-based
 // or ATmega2560-based Arduino, as well as the Sanguino or Mioduino.
 
