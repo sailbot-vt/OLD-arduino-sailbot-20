@@ -9,9 +9,10 @@
  * and is written for the Teensy 4.0, 3.2 platforms, which can be compiled and 
  * uploaded using the Arduino IDE 
  * directory referencing:
-/home/andy/Documents/Personal/SailBOT/ArduinoMotorControl2020/arduino-sailbot-20/main/Motors/src
-
-/home/andy/Documents/Personal/SailBOT/ArduinoMotorControl2020/arduino-sailbot-20/dependencies/libs
+ *
+ *
+ * By convention this program uses: 
+ * `floats` for floating point numbers as the double is just not needed 
  */
 
 #include <PololuMaestro.h>
@@ -19,6 +20,11 @@
 
 #define MAESTRO_SERVOANGLE_MS_MAX 8000 // The max servo angle in milliseconds
 #define MAESTRO_SERVOANGLE_MS_MIN 4000 // The min servo angle in milliseconds
+
+// The maestro returns milliseconds as a representation of the current position
+// of a servo and has the return value of uint8_t, here we type alias it to 
+// make things a little more readable
+using ms_t = uint8_t; 
 
 class SB_Servo { 
 	private: 
@@ -29,6 +35,8 @@ class SB_Servo {
 						     // indicates the channel has not been assigned
 		int maxDegree = 180; // the maximum degree the servo can rotate to 
 		int minDegree = 0; // the minimum degree the servo can rotate to  
+		float msToDegrees(ms_t ms);
+		int degToMS(float degrees);  
 
    	public: 
 		/** 
@@ -95,6 +103,15 @@ class SB_Servo {
 		 */
 		bool setMinimumAngle(int);
 		
+		/** 
+		 * Gets the current degrees of this servo 
+		 * by sending asking the maestro for the current degrees of the servo
+		 *
+		 * @return the current degrees.
+		 * @return -1 if there is a communication failure
+		 */
+		float getCurrentDegrees();
+
 		/** Rotates this servo to a specific degrees, 0-180, or within the minimum
 		 * and maximum values as dictated by the member values
 		 *
@@ -103,6 +120,19 @@ class SB_Servo {
 		 * if a channel number was never asserted then the Servo will do nothing and return false; 
 		 */
 		bool rotateToDegrees(float degrees);
+
+
+		/** 
+		 * Rotates the servo by a set amount   
+		 * Checks to make sure that the requested amount is within the servos
+		 * tolerated limits
+		 * This method also directly modifies the Servos, and thus 
+		 * needs to be able to raise some kind of error if communication with the Maestro
+		 * fails 
+		 * @param degreesBy -- the amount of degrees to turn by 
+		 * @return whether or not the requested operation was doable
+		 */
+		bool rotateBy(float degreesBy);
 
 
 };

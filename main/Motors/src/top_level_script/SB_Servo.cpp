@@ -77,12 +77,3 @@ bool SB_Servo::rotateToDegrees(float degree) {
 		return true;
 	}
 }
-
-
-
-
-
-
-
-
-

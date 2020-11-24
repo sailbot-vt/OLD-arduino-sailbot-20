@@ -14,7 +14,7 @@ SB_Servo servo1;
 void setup() {
   // put your setup code here, to run once:
   
-
+servo1.rotateToDegrees(500);
 
 } 
 
