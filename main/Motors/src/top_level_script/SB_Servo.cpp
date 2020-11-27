@@ -8,18 +8,20 @@
 
 // Here the maestro is initialized to Serial1 on the Teensy, this is just one of 8 ports 
 // pretty neat. I suppose this is how static private variables are initialized
-MiniMaestro SB_Servo::maestro(Serial1);
+MiniMaestro SB_Servo::maestro(Serial);
 
 
-ms_t SB_Servo::degToMS(float degrees) { 
-	return (ms_t) map(degree, minDegree, maxDegree, 
-				MAESTRO_SERVOANGLE_MS_MIN, MAESTRO_SERVOANGLE_MS_MAX);
+/** 
+ * uses point slope form to calculate a ms value for the maestro for a given degree
+ */ 
+ms_t SB_Servo::degToMS(float degree) { 
+	return (ms_t) ((maxMS - minMs) / MAX_DEGREE) * (degree - MIN_DEGREE) 
 }
 
 
 float SB_Servo::msToDegrees(ms_t ms) { 
-	return map(ms, MAESTRO_SERVOANGLE_MS_MIN, MAESTRO_SERVOANGLE_MS_MIN, 
-				minDegree, maxDegree);
+	return (MAX_DEGREE / (maxMS - minMS) * (ms - minMs)) + MIN_DEGREE;
+	
 }
 
 /* For now I'm going to comment out the default constructor, nothing is supposed to work if you 
@@ -31,15 +33,15 @@ SB_Servo::SB_Servo() {
 
 SB_Servo::SB_Servo(int channel) { 
 	channelNum = channel;	
-	Serial1.begin(9600);
+	Serial.begin(9600);
 	//currentDegrees = maestro.getPosition(channel); // get the degrees at initialization 
 }
 
-SB_Servo::SB_Servo(int minDegree, int maxDegree, int channel) { 
-	this->maxDegree = maxDegree;
-	this->minDegree = minDegree;
+SB_Servo::SB_Servo(ms_t minMS, ms_t maxMS, int channel) { 
+	this->maxMS = maxMS;
+	this->minMS= minMS;
 	channelNum = channel;	
-	Serial1.begin(9600);
+	Serial.begin(9600);
 	// For now, I'm going to leave these commented out, I'm not a huge fan of the idea 
 	// of keeping the current Degrees in a variable, it should routinely accessed by method
 	// currentDegrees = maestro.getPosition(channel); // get the degrees at initialization 
@@ -54,9 +56,9 @@ bool SB_Servo::setChannel(int channel) {
 	}
 }
 
-bool SB_Servo::setMaximumAngle(int maximum) { 
-	if (maximum >= 0 && maximum <= 180 && maximum > minDegree) { 
-		maxDegree = maximum;
+bool SB_Servo::setMaximumMS(int maximum) { 
+	if (maximum >= 0 && maximum <= 180 && maximum > minMS) { 
+		maxMS = maximum;
 		return true;
 	} else { 
 		return false;
@@ -64,7 +66,7 @@ bool SB_Servo::setMaximumAngle(int maximum) {
 }
 
 bool SB_Servo::setMinimumAngle(int minimum) { 
-	if (minimum >= 0 && minimum <= 180 && minimum < maxDegree) { 
+	if (minimum >= 0 && minimum <= 180 && minimum < maxMS) { 
 		minDegree = minimum;
 		return true;
 	} else { 
@@ -81,11 +83,13 @@ float SB_Servo::getCurrentDegrees() {
 
 
 bool SB_Servo::rotateToDegrees(float degree) { 
-	if (degree > maxDegree) { 
-	   degree = maxDegree;	
-	} else if (degree < minDegree) { 
+	if (degree > maxMS) { 
+	   degree = maxMS;	
+	} else if (degree < minDegree) {
+    
 		degree = minDegree;
 	}
+ Serial.println("Attempting to move"); 
 
 	int msToWrite; // Value to write to the maestro
 	if (channelNum == -1) { 
@@ -113,7 +117,7 @@ bool SB_Servo::rotateBy(float degreesBy) {
 		// each time we wish to compare, but this is how it will be implemented to begin with. 
 		currentDeg = getCurrentDegrees(); 
 	}
-	if (currentDeg + degreesBy > maxDegree) { 
+	if (currentDeg + degreesBy > maxMS) { 
 		return false;
 	} else if (currentDeg + degreesBy < minDegree) { 
 		return false;
@@ -123,10 +127,3 @@ bool SB_Servo::rotateBy(float degreesBy) {
 	}
 }
 	
-
-
-
-
-
-
-

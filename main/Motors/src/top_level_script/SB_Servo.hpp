@@ -18,13 +18,13 @@
 #include <PololuMaestro.h>
 // #include <stdexcept> arduino compiler doesnt like to throw errors
 
-#define MAESTRO_SERVOANGLE_MS_MAX 8000 // The max servo angle in milliseconds
-#define MAESTRO_SERVOANGLE_MS_MIN 4000 // The min servo angle in milliseconds
 
 // The maestro returns milliseconds as a representation of the current position
 // of a servo and has the return value of uint8_t, here we type alias it to 
 // make things a little more readable
 using ms_t = uint8_t; 
+#define MAX_DEGREE 180 
+#define MIN_DEGREE 0 
 
 class SB_Servo { 
 	private: 
@@ -33,10 +33,18 @@ class SB_Servo {
 		static MiniMaestro maestro;
 		int channelNum = -1; // default value for the channel, 
 						     // indicates the channel has not been assigned
-		int maxDegree = 180; // the maximum degree the servo can rotate to 
-		int minDegree = 0; // the minimum degree the servo can rotate to  
+		/** 
+		 * These values are found from servo specific data sheets					 
+		 * The default values are referenced from the HS-422 0-180* digital servo 
+		 * Which has specific values of 500-2500 us. The maestro's specifications use 
+		 * 4x pulse widths, just how it works, thus we use 2k and 10k as
+		 * the minimum and maximum pulses.
+		 */
+		int maxMS = 10000; 
+		int minMS = 2000; 
+
 		float msToDegrees(ms_t ms);
-		int degToMS(float degrees);  
+		ms_t degToMS(float degrees);  
 
    	public: 
 		/** 
