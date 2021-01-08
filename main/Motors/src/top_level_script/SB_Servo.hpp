@@ -38,12 +38,24 @@ class SB_Servo {
 		 * The default values are referenced from the HS-422 0-180* digital servo 
 		 * Which has specific values of 500-2500 us. The maestro's specifications use 
 		 * 4x pulse widths, just how it works, thus we use 2k and 10k as
-		 * the minimum and maximum pulses.
+		 * the default minimum and maximum pulses, these are modified in the parameterized constructor
 		 */
 		int maxMS = 10000; 
 		int minMS = 2000; 
 
+		/** Convert a ms value into a degrees value
+		 * @param ms -- the ms to convert
+		 * @return the degrees in float form from 0 to 180
+		 */
 		float msToDegrees(ms_t ms);
+
+		/**
+		 * Convert traditional 0-180 degrees into ms for the maestro to use
+		 * the maestro uses ms for calculating servo angles, thus this method
+		 * acts as an interface from human readable degrees to ms, which the machine uses
+		 * @param degrees -- the degrees in 0-180
+		 * @return the ms representation of the degrees
+		 */
 		ms_t degToMS(float degrees);  
 
    	public: 
@@ -76,6 +88,7 @@ class SB_Servo {
 		 * to be able to dictated by .xml or .yml file
 		 */
 		SB_Servo(int minDegr, int maxDegr, int channel);
+		SB_Servo(ms_t minDegr, ms_t maxDegr, int channel);
 
 
 		/** 
@@ -100,6 +113,30 @@ class SB_Servo {
 		 * @return whether or not the passed value was within the acceptable range
 		 */
 		bool setMaximumAngle(int);
+
+		/**
+		 * Sets the maximum possible MS that this given servo can rotate to
+		 * Each servo has it's own possible maximum. These values are probably 
+		 * going to need to be stored in some sort of database or something 
+		 * This, along with min ms or something like that 
+		 * @param maximum -- the max ms_t that the servo can rotate to 
+		 * @return whether or not the maximum was set properly 
+		 * 		   The method should really only return false if the max is less than the min
+		 * 		   Or if the value passed is less than 0
+		 */
+		bool setMaximumMS(ms_t maximum);
+
+		/**
+		 * Sets the minimum possible MS that this given servo can rotate to
+		 * Each servo has it's own possible minimum. These values are probably 
+		 * going to need to be stored in some sort of database or something 
+		 * @param minimum -- the max ms_t that the servo can rotate to 
+		 * @return whether or not the maximum was set properly 
+		 * 		   The method should really only return false if the min is greater than the max 
+		 * 		   Or if the value passed is less than 0
+		 */
+		bool setMinimumMS(ms_t minimum);
+
 
 		/** 
 		 * Sets the min angle

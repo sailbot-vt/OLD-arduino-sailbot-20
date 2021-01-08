@@ -15,12 +15,12 @@ MiniMaestro SB_Servo::maestro(Serial);
  * uses point slope form to calculate a ms value for the maestro for a given degree
  */ 
 ms_t SB_Servo::degToMS(float degree) { 
-	return (ms_t) ((maxMS - minMs) / MAX_DEGREE) * (degree - MIN_DEGREE) 
+	return (ms_t) ((maxMS - minMS) / MAX_DEGREE) * (degree - MIN_DEGREE);
 }
 
 
 float SB_Servo::msToDegrees(ms_t ms) { 
-	return (MAX_DEGREE / (maxMS - minMS) * (ms - minMs)) + MIN_DEGREE;
+	return (MAX_DEGREE / (maxMS - minMS) * (ms - minMS)) + MIN_DEGREE;
 	
 }
 
@@ -38,8 +38,8 @@ SB_Servo::SB_Servo(int channel) {
 }
 
 SB_Servo::SB_Servo(ms_t minMS, ms_t maxMS, int channel) { 
-	this->maxMS = maxMS;
-	this->minMS= minMS;
+	setMinimumMS(minMS);
+	setMaximumMS(maxMS);
 	channelNum = channel;	
 	Serial.begin(9600);
 	// For now, I'm going to leave these commented out, I'm not a huge fan of the idea 
@@ -56,15 +56,24 @@ bool SB_Servo::setChannel(int channel) {
 	}
 }
 
-bool SB_Servo::setMaximumMS(int maximum) { 
-	if (maximum >= 0 && maximum <= 180 && maximum > minMS) { 
+bool SB_Servo::setMaximumMS(ms_t maximum) { 
+	if (maximum >= 0 && maximum > minMS) { 
 		maxMS = maximum;
 		return true;
 	} else { 
 		return false;
 	}
 }
+bool SB_Servo::setMinimumMS(ms_t minimum) { 
+	if (minimum >= 0 && minimum < maxMS) { 
+		minMS = minimum;
+		return true;
+	} else { 
+		return false;
+	}
+}
 
+/**
 bool SB_Servo::setMinimumAngle(int minimum) { 
 	if (minimum >= 0 && minimum <= 180 && minimum < maxMS) { 
 		minDegree = minimum;
@@ -73,25 +82,26 @@ bool SB_Servo::setMinimumAngle(int minimum) {
 		return false;
 	}
 }
+*/
 
 
 float SB_Servo::getCurrentDegrees() { 
 	ms_t currentMS = maestro.getPosition(channelNum); // TODO: See what these return values are 
 													  // and find a way to return -1 when theres comm failure
-	return	currentMS; 
+	return msToDegrees(currentMS); 
 }
 
 
 bool SB_Servo::rotateToDegrees(float degree) { 
-	if (degree > maxMS) { 
-	   degree = maxMS;	
-	} else if (degree < minDegree) {
+	int msToWrite = degToMS(degree);
+	if (msToWrite > maxMS) { 
+	   msToWrite = maxMS;	
+	} else if (degree < minMS) {
     
-		degree = minDegree;
+		msToWrite = minMS;
 	}
- Serial.println("Attempting to move"); 
+ 	Serial.println("Attempting to move"); 
 
-	int msToWrite; // Value to write to the maestro
 	if (channelNum == -1) { 
 		//throw std::runtime_error("Attempted to move Servo without assigning channel number");
 		// figure out something to do, arduino compiler doesn't like to throw errors 
@@ -100,7 +110,6 @@ bool SB_Servo::rotateToDegrees(float degree) {
 		// whether or not the rotate was successful
 		return false;
 	} else { 
-		msToWrite = degToMS(degree);
 		maestro.setTarget(channelNum, msToWrite); // TODO: implement some sort of comm failure mode
 		return true;
 	}
@@ -117,13 +126,13 @@ bool SB_Servo::rotateBy(float degreesBy) {
 		// each time we wish to compare, but this is how it will be implemented to begin with. 
 		currentDeg = getCurrentDegrees(); 
 	}
-	if (currentDeg + degreesBy > maxMS) { 
-		return false;
-	} else if (currentDeg + degreesBy < minDegree) { 
+	ms_t desiredMS = degToMS(currentDeg + degreesBy);
+	if (desiredMS > maxMS || 
+		desiredMS < minMS) { 
 		return false;
 	} else { 
-		ms_t desiredMS = degToMS(currentDeg + degreesBy);
 		maestro.setTarget(channelNum, desiredMS); // Move the maestro, again this needs a failure mode
+		return true;
 	}
 }
 	
