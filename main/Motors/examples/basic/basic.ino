@@ -19,15 +19,10 @@ void setup() {
 
 void loop() {
  if (Serial.available()) { 
-    Serial.print("Farts");
-
     int val = Serial.parseInt();
-    maestro.setTarget(1, val);
+    maestro.setTarget(0, val);
     int pos = maestro.getPosition(0);
     Serial.print("Position: ");
     Serial.println(pos);
-    
-    //Serial.flush();
-   
   }
 } 

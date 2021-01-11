@@ -11,35 +11,24 @@ MiniMaestro maestro(Serial1);
 // When the #include is in a sub directory from the top level script. Wow that is so annoying
 #include "SB_Servo.hpp"
 Servo myServo;
-SB_Servo servo1(1);
+SB_Servo servo1(0);
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   Serial1.begin(9600);
-  //while (!Serial1) { 
-      
-  //}
-  pinMode(13, OUTPUT);
-  servo1.rotateToDegrees(500);
-  digitalWrite(13, HIGH);
-  myServo.attach(4);
-  
 } 
 
-void loop() {
-//  servo1.rotateToDegrees(100);
+void loop() { 
   
-  //delay(400);
-  //digitalWrite(13, LOW);
-  //maestro.setTarget(0, 6000);
-  if (Serial.available()) { 
+  if (Serial.available()) {
+    /** 
     int val = Serial.parseInt();
-    //Serial.println(val);
     maestro.setTarget(0, val);
     int pos = maestro.getPosition(0);
     Serial.print("Position: ");
     Serial.println(pos);
-    //myServo.write(val);
+    */
+    servo1.rotateToDegrees(Serial.parseInt());
   }
 
   

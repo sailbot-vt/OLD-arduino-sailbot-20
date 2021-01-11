@@ -9,24 +9,24 @@ The goal of this branch is to create an API for servos so that:
 4) Allows for various parameters to passed as per servo characteristics.
 5) Provides error checking with error feedback mechanisms.
 
-Motor source code shall reside in `./main/Motors/src` while .hpp's shall be in `./main/Motors/inc`
 
-External dependencies: 
+## External dependencies: 
+Since the Arduino IDE is by the far the easiest way to compile the repository's programs, we'll have to work around a few of its quirks, which mainly just involves moving some files around
+once you've cloned this repo 
 
+The two directories that have to be moved are the PololuMaestro library, and our own SB_Servo library. The Maestro can easily be installed with the Arduino IDE, but our personal library will have to be moved
+by hand 
 
-`PololuMaestro` -- this can be installed by using `crtl+shift+I` from within the Arduino IDE and then searching for the library.
-	If for some ungodly reason this isn't working you can get these files from within this repo, however you'll have to put them into a specific directory yourself
-	
-The Arduino one (AND ONLY) `ld` path is along the lines of `yourOSprefix/User/Documents/Arduino/libraries`. It then searches for library directories from within there. (You may be able to get away with just modifying `$LD_LIBRARY_PATH` and that may work but I haven't tried it since the changes won't persist) 	
-
-To use the PololuMaestro library, the library directory must be copied into the above directory. These files are included in the 
-	`./dependencies/PololuMaestro` directory and need to be moved to the above directories. The final path once pasted should be along the lines of 
-	`/home/yourName/Documents/Arduino/PololuMaestro/` for a unix system, or `C:\Users\yourName\Documents\Arduino\PololuMaestro` for windows
-
+On the Linux, the following should accomplish everything listed below.
+1) Install the Arduino IDE, you should have a directory at `/home/$USER/Arduino`
+2) Move into the directory where you cloned the repo to, a `pwd` should show your path as: `/home/$USER/Blah/Blah/Blah/arduino-sailbot-20`
+3) Execute the following command which copies the library dependencies into your Arduino library directory: `cp -r dependencies/libs/* ~/Arduino/libraries/`
 
 
+On Windows, find the two directories, `PololuMaestro` and `SB_Servo` in `arduino-sailbot-20\dependencies\libs\`, and copy them into `C:\Users\yourName\Documents\Arduino\Libraries\`
 
+## Testing:
+Since traditional testing in C++ using the Catch framework is a little awkward, the current approach is to simply run various Arduino and ensure the correct outputs are presented on the Serial monitor. The current scripts directories for testing are located in `arduino-sailbot-20/main/Motors/testing`
 
-notes: 
-	Our self wrapper Library (SB_Servo) is going to most likely have to use relational `#includes`. This is because it's compiling Arduino stuff by hand is difficult, thus altering the library path 
-	is also difficult. For now we'll use relational include statements, such as `#include ../../Servo.h`
+> `testConversions` -- test the methods `degToMS(float)` and `msToDegrees(ms_t)`
+> `testRotations` -- test the methods `rotateToDegrees(float)`, `getCurrentDegrees()` and `rotateByDegrees(float)`
