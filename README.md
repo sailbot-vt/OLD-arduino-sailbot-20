@@ -25,6 +25,9 @@ On the Linux, the following should accomplish everything listed below.
 
 On Windows, find the two directories, `PololuMaestro` and `SB_Servo` in `arduino-sailbot-20\dependencies\libs\`, and copy them into `C:\Users\yourName\Documents\Arduino\Libraries\`
 
+
+NOTE: You'll have to repeat the above process for every commit to this repo for the servo library. You can circumvent this by creating symbolic links/shortcuts in your Arduino/Libraries directory. No one actually is ever going to read this so I'm not typing out how to do it right now.
+
 ## Testing:
 Since traditional testing in C++ using the Catch framework is a little awkward, the current approach is to simply run various Arduino and ensure the correct outputs are presented on the Serial monitor. The current scripts directories for testing are located in `arduino-sailbot-20/main/Motors/testing`
 
