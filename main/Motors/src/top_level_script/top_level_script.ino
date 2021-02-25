@@ -28,7 +28,9 @@ void loop() {
     Serial.print("Position: ");
     Serial.println(pos);
     */
-    servo1.rotateToDegrees(Serial.parseInt());
+    //servo1.rotateToDegrees(Serial.parseInt());
+    servo1.rotateBy(Serial.parseInt());
+    
   }
 
   

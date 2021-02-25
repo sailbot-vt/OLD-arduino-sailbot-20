@@ -20,7 +20,9 @@ ms_t SB_Servo::degToMS(float degree) {
 
 
 float SB_Servo::msToDegrees(ms_t ms) { 
-	return (MAX_DEGREE / (maxMS - minMS) * (ms - minMS)) + MIN_DEGREE;
+  Serial.print("Calc'd degrees: ");
+  Serial.println(MAX_DEGREE / ((float) maxMS - minMS));
+	return (MAX_DEGREE / ((float) maxMS - minMS)) * (ms - minMS) + MIN_DEGREE;
 	
 }
 
@@ -88,6 +90,8 @@ bool SB_Servo::setMinimumAngle(int minimum) {
 float SB_Servo::getCurrentDegrees() { 
 	ms_t currentMS = maestro.getPosition(channelNum); // TODO: See what these return values are 
 													  // and find a way to return -1 when theres comm failure
+                           Serial.print("Current MS: ");
+                           Serial.println(currentMS);
 	return msToDegrees(currentMS); 
 }
 
@@ -117,22 +121,36 @@ bool SB_Servo::rotateToDegrees(float degree) {
 }
 
 bool SB_Servo::rotateBy(float degreesBy) { 
+
+  Serial.println("We didn't even get here!!!!");
 	float currentDeg;
 	if (channelNum == -1) { 
+    Serial.println(channelNum);
 		return false; // Servo not connected yet 
 	} else { 
+  Serial.println("before current Deg");
 		// Here we will call getCurrentDegrees() only once because it involves a two way
 		// transmission w/ the maestro, which we'll want to decrease the amount of times performed
 		// to decrease latency. It could be argued that getCurrentDegrees() should be called 
 		// each time we wish to compare, but this is how it will be implemented to begin with. 
 		currentDeg = getCurrentDegrees(); 
+    Serial.println("after current Deg");
 	}
+     Serial.println(currentDeg);
+
 	ms_t desiredMS = degToMS(currentDeg + degreesBy);
 	if (desiredMS > maxMS || 
-		desiredMS < minMS) { 
+		desiredMS < minMS) {
+    Serial.print("Attempting to move: "); 
+    Serial.println(desiredMS); 
+ 
 		return false;
 	} else { 
-		maestro.setTarget(channelNum, desiredMS); // Move the maestro, again this needs a failure mode
+		maestro.setTarget(channelNum, desiredMS);
+		// Move the maestro, again this needs a failure mode
+    Serial.print("Attempting to move: "); 
+    Serial.println(desiredMS); 
+
 		return true;
 	}
 }
