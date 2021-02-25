@@ -11,7 +11,7 @@ MiniMaestro maestro(Serial1);
 // When the #include is in a sub directory from the top level script. Wow that is so annoying
 #include "SB_Servo.hpp"
 Servo myServo;
-SB_Servo servo1(0);
+SB_Servo servo1((ms_t) 2000, (ms_t) 10000, 0);
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -34,5 +34,3 @@ void loop() {
   
   
 } 
-
-// /home/andy/Documents/Personal/SailBOT/ArduinoMotorControl2020/arduino-sailbot-20/main/Motors/src/sketch_nov20a/../SB_Servo.hpp

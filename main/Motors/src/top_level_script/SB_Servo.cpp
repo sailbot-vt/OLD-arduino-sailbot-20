@@ -15,7 +15,7 @@ MiniMaestro SB_Servo::maestro(Serial1);
  * uses point slope form to calculate a ms value for the maestro for a given degree
  */ 
 ms_t SB_Servo::degToMS(float degree) { 
-	return (ms_t) ((maxMS - minMS) / MAX_DEGREE) * (degree - MIN_DEGREE);
+	return (ms_t) ((maxMS - minMS) / MAX_DEGREE) * (degree) + minMS;
 }
 
 

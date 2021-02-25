@@ -18,7 +18,6 @@
 #include <PololuMaestro.h>
 // #include <stdexcept> arduino compiler doesnt like to throw errors
 
-
 // The maestro returns milliseconds as a representation of the current position
 // of a servo and has the return value of uint8_t, here we type alias it to 
 // make things a little more readable
