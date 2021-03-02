@@ -8,6 +8,7 @@ MiniMaestro maestro(Serial1);
 #include "SB_Servo.hpp"
 //SB_Servo servo1((ms_t) 2000, (ms_t) 10000, 0); // It appears that this doesn't work apparently
 SB_Servo servo1(0);
+//SB_Servo servo2(2);
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);

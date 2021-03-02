@@ -5,6 +5,7 @@ MiniMaestro maestro(Serial1);
 // Here we will use the default values 
 // Which are consistent w/ the HS-422 servo 
 SB_Servo testServo(0);
+SB_Servo testServo1(2);
 bool loopOnce = true;
 
 void setup() { 
