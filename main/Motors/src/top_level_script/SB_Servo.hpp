@@ -14,6 +14,8 @@
  * By convention this program uses: 
  * `floats` for floating point numbers as the double is just not needed 
  */
+#ifndef SB_servo
+#define SB_servo
 
 #include <PololuMaestro.h>
 // #include <stdexcept> arduino compiler doesnt like to throw errors
@@ -115,27 +117,33 @@ class SB_Servo {
 		bool setMaximumAngle(int);
 
 		/**
-		 * Sets the maximum possible MS that this given servo can rotate to
+		 * Sets the maximum possible us that this given servo can rotate to
 		 * Each servo has it's own possible maximum. These values are probably 
 		 * going to need to be stored in some sort of database or something 
-		 * This, along with min ms or something like that 
-		 * @param maximum -- the max ms_t that the servo can rotate to 
+		 * This, along with min us or something like that 
+     * 
+     * THESE METHODS USE MICRO SECONDS, NOT MAESTRO MILLISECONDS ********************************************************8
+     * The maestro writes micro seconds to servos with a 4x scalar multiplier. Don't ask me why. 
+     * Thus, when we use the manufacturer's rating of 500-2500us, the internal maximums for the class
+     * are thus 2000-10k. WRITE TO THESE METHODS USING 500-2500us. If this doesnt make sense to you, 
+     * Look up the HS422 - it has a maximum range of 500-2500us. Thus you would call this method, myHS422Servo.setMaximumUS(2500);
+		 * @param maximum -- the max us that the servo can rotate to 
 		 * @return whether or not the maximum was set properly 
 		 * 		   The method should really only return false if the max is less than the min
 		 * 		   Or if the value passed is less than 0
 		 */
-		bool setMaximumMS(ms_t maximum);
+		bool setMaximumUS(ms_t maximum);
 
 		/**
-		 * Sets the minimum possible MS that this given servo can rotate to
+		 * Sets the minimum possible us that this given servo can rotate to
 		 * Each servo has it's own possible minimum. These values are probably 
 		 * going to need to be stored in some sort of database or something 
-		 * @param minimum -- the max ms_t that the servo can rotate to 
+		 * @param minimum -- the max us that the servo can rotate to 
 		 * @return whether or not the maximum was set properly 
 		 * 		   The method should really only return false if the min is greater than the max 
 		 * 		   Or if the value passed is less than 0
 		 */
-		bool setMinimumMS(ms_t minimum);
+		bool setMinimumUS(ms_t minimum);
 
 
 		/** 
@@ -178,6 +186,5 @@ class SB_Servo {
 		 * @return whether or not the requested operation was doable
 		 */
 		bool rotateBy(float degreesBy);
-
-
 };
+#endif

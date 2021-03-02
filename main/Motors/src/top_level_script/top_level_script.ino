@@ -1,8 +1,4 @@
-#include <PololuMaestro.h>
-#include <Servo.h>
-int msPosition;
-char commandArray[1];
-
+#include "SB_Servo.hpp"
 MiniMaestro maestro(Serial1);
 
 
@@ -10,8 +6,8 @@ MiniMaestro maestro(Serial1);
 // Yea just tested it, SB_Servo either has to be in this directory or in a sub-directory. Yes it works
 // When the #include is in a sub directory from the top level script. Wow that is so annoying
 #include "SB_Servo.hpp"
-Servo myServo;
-SB_Servo servo1((ms_t) 2000, (ms_t) 10000, 0);
+//SB_Servo servo1((ms_t) 2000, (ms_t) 10000, 0); // It appears that this doesn't work apparently
+SB_Servo servo1(0);
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -21,16 +17,10 @@ void setup() {
 void loop() { 
   
   if (Serial.available()) {
-    /** 
-    int val = Serial.parseInt();
-    maestro.setTarget(0, val);
-    int pos = maestro.getPosition(0);
-    Serial.print("Position: ");
-    Serial.println(pos);
-    */
-    //servo1.rotateToDegrees(Serial.parseInt());
-    servo1.rotateBy(Serial.parseInt());
-    
+    int goHere = Serial.parseInt();
+    Serial.println(goHere);
+    servo1.rotateToDegrees(goHere);
+    Serial.println(servo1.getCurrentDegrees());
   }
 
   
