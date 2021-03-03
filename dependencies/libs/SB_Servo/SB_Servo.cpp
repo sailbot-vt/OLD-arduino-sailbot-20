@@ -119,9 +119,11 @@ bool SB_Servo::rotateBy(float degreesBy) {
 		// transmission w/ the maestro, which we'll want to decrease the amount of times performed
 		// to decrease latency. It could be argued that getCurrentDegrees() should be called 
 		// each time we wish to compare, but this is how it will be implemented to begin with. 
-		currentDeg = getCurrentDegrees(); 
+		// We also add .5 and cast to an integer in order to round to the nearest int 
+		// this stops cumulative error build up when performing multiple rotateBy's -- 
+		// do enough of them and the system can get off by entire degrees without this fix 
+		currentDeg = (int) (getCurrentDegrees() + .5);  
 	}
-
 	ms_t desiredMS = degToMS(currentDeg + degreesBy);
 	if (desiredMS > maxMS || 
 		desiredMS < minMS) {
