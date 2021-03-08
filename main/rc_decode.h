@@ -36,6 +36,8 @@ class RCDecode {
         interruptStruct *trimStruct;
         interruptStruct *rudderStruct;
 };
+
+// quick change
         
 
 /**
