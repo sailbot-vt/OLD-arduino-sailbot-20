@@ -1,6 +1,6 @@
 #include "rc_decode.h"
 //#include "lidar.h"
-#include "PinChangeInt.h"
+//#include "PinChangeInt.h"
 #include <stdio.h>
 
 // initalize trimStruct and ruddeStruct
@@ -22,8 +22,8 @@ void setup(void) {
     Serial.begin(115200); 
 
     // Attach interrupt functions to change in pins
-    PCintPort::attachInterrupt(TRIMPIN, trimPinInterrupt, CHANGE);
-    PCintPort::attachInterrupt(RUDDERPIN, rudderPinInterrupt, CHANGE);
+    attachInterrupt(TRIMPIN, trimPinInterrupt, CHANGE);
+    attachInterrupt(RUDDERPIN, rudderPinInterrupt, CHANGE);
 
 }
 
@@ -32,13 +32,11 @@ char rudder_duty_cycle_str[24];
 char lidar_str[24];
 
 void loop(void) {
-  
     // Get duty cycle for each pin and output over serial
     sprintf(trim_duty_cycle_str, "Trim Val =  %f", getScaledTrimOutput(trimStruct->dutyCycle));
     sprintf(rudder_duty_cycle_str, "Rudder Val =  %f", getScaledRudderOutput(rudderStruct->dutyCycle));
     Serial.println(trim_duty_cycle_str);
     Serial.println(rudder_duty_cycle_str);
-
 /*
     // read LiDAR reading and print it over serial
     readLiDARStruct(lidar_data);

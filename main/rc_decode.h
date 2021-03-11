@@ -1,5 +1,5 @@
-#define TRIMPIN A0
-#define RUDDERPIN A1
+#define TRIMPIN A4
+#define RUDDERPIN A5
 
 #define TRIMOUTPUT 2
 #define RUDDEROUTPUT 3
@@ -17,8 +17,8 @@
 struct interruptStruct {
   volatile unsigned long fallTime = 0;       // Microsecond time of last falling edge
   volatile unsigned long riseTime = 0;       // Microsecond time of last rising edge
-  volatile float dutyCycle = 0;               // Duty Cycle %
-  volatile unsigned long lastRead = 0;        // Last interrupt time
+  volatile float dutyCycle = 0;              // Duty Cycle %
+  volatile unsigned long lastRead = 0;       // Last interrupt time
 };
 
 class RCDecode {
