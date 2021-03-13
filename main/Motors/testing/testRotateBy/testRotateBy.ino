@@ -6,9 +6,7 @@
  * from 0 to around 180, then decrements back to 0. 
  * The test results can be read on the serial monitor.
  * 
- * SailBot 2021
- * A. Heller-Jones
- * 3/2/2021
+ * AHJ
  */
 
 #include <SB_Servo.hpp>
@@ -34,7 +32,7 @@ void setup() {
 
 void loop() { 
   if (!loopOnce) {
-    
+    // End of test
   } else { 
 	double angle = 0;
 	int rotateBy = 0;

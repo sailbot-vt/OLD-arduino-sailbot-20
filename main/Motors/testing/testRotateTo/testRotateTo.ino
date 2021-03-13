@@ -1,3 +1,10 @@
+/**
+ * Rotates a servo connected to the maestro in channel 0
+ * and rotates in from 0 to 180 degrees in 10 degree increments.
+ * Reports back the position that the servo rotated to.
+ * 
+ * AHJ
+ */
 #include <SB_Servo.hpp>
 
 MiniMaestro maestro(Serial1);
@@ -5,7 +12,6 @@ MiniMaestro maestro(Serial1);
 // Here we will use the default values 
 // Which are consistent w/ the HS-422 servo 
 SB_Servo testServo(0);
-SB_Servo testServo1(2);
 bool loopOnce = true;
 
 void setup() { 
@@ -16,7 +22,7 @@ void setup() {
 
 void loop() { 
   if (!loopOnce) {
-    
+    // End of test
   } else { 
 	Serial.print("Initial servo degrees: ");
 	Serial.println(testServo.getCurrentDegrees());

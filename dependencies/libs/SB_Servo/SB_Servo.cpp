@@ -1,7 +1,8 @@
 /**
  * Source file for SB_Servo.hpp, contains function definitions 
  * to implement the SailBot 2021 Servo wrapper 
- * A. Heller-Jones
+ *
+ * AHJ
  */
 
 #include "SB_Servo.hpp"
@@ -14,44 +15,80 @@
 /** 
  * uses point slope form to calculate a ms value for the maestro for a given degree
  */ 
-ms_t SB_Servo::degToMS(float degree) {
-	return ((float) (maxMS - minMS) / MAX_DEGREE) * (degree) + minMS;
+int SB_Servo::degToUS(float degree) {
+	return ((float) (maxUS - minUS) / degreeRangeTop) * (degree) + minUS;
 }
 
 
-float SB_Servo::msToDegrees(ms_t ms) { 
-	return (MAX_DEGREE / ((float) maxMS - minMS)) * (ms - minMS) + MIN_DEGREE;
+float SB_Servo::usToDegrees(int ms) { 
+	return (degreeRangeTop / ((float) maxUS - minUS)) * (ms - minUS) + degreeRangeBottom;
 }
 
-/* For now I'm going to comment out the default constructor, nothing is supposed to work if you 
- * dont specify a channel number 
-SB_Servo::SB_Servo() { 
-	Serial1.begin(9600);
-}	
-*/
 
-SB_Servo::SB_Servo(int channel) { 
-	channelNum = channel;	
+SB_Servo::SB_Servo(int channel) : SB_Servo(DEFAULT_MIN_US, DEFAULT_MAX_US, channel) {}
 
+SB_Servo::SB_Servo(int minUS, int maxUS, int channel) : 
+	SB_Servo(
+		minUS, maxUS, 
+		DEFAULT_MIN_ANGLE, DEFAULT_MAX_ANGLE, DEFAULT_MIN_ANGLE, DEFAULT_MAX_ANGLE) {}
+
+
+SB_Servo::SB_Servo(int minimumUS, int maximumUS, float minimumRange, float maximumRange, 
+	float minimumAngle, float maximumAngle, int channel) : 
+	
+	minUS{4 * minimumUS},
+	maxUS{4 * maximumUS}, 
+	degreeRangeTop
+
+
+
+
+
+{ 
+
+	setMinimumUS(minUS);
+	setMaximumUS(maxUS);
+	degreeRangeBottom = minRange;
+	degreeRangeTop = maxRange;
+	channelNum = channel;
 }
 
-SB_Servo::SB_Servo(ms_t minMS, ms_t maxMS, int channel) { 
-	setMinimumUS(minMS);
-	setMaximumUS(maxMS);
-	channelNum = channel;	
-	// For now, I'm going to leave these commented out, I'm not a huge fan of the idea 
-	// of keeping the current Degrees in a variable, it should routinely accessed by method
-	// currentDegrees = maestro.getPosition(channel); // get the degrees at initialization 
-}
 
-bool SB_Servo::setChannel(int channel) { 
+
+bool SB_Servo::checkChannel() { 
+	/**
 	if (channelNum  >= 0 && channelNum <= 127) { 
 		channelNum = channel;	
 		return true;
 	} else {
 		return false;
 	}
+	*/
+	if (channelNum < 0 || channelNum > 127) { 
+		errorCode |= CONFIG_ERROR_MASK;
+		errorCode |= 0x40;
+	}
 }
+
+
+/** 
+ *  READ THE setMaximumUS() comment in the .cpp and .hpp
+ */
+void SB_Servo::checkMinMS(int minimum) { 
+	/**
+	if (minimum >= 0 && 4 * minimum < maxUS) { 
+		minUS = 4 * minimum;
+	} else { 
+		errorCode |= CONFIG_ERROR_MASK;
+		errorCode |= 0x1
+	}
+	*/
+	if (minUS < 0 || minUS < maxUS) { 
+		errorCode |= CONFIG_ERROR_MASK;
+		errorCode |= 0x1;
+	}
+}
+
 
 /**
  * This method uses the manufacturer's maximum
@@ -59,42 +96,63 @@ bool SB_Servo::setChannel(int channel) {
  * The maestro will use 2000 - 10k ms. Don't ask me why the Maestro uses 4x larger values, it just does.
  * See the .hpp for more info
  */
-bool SB_Servo::setMaximumUS(ms_t maximum) { 
-	if (maximum >= 0 && maximum > minMS) { 
-		maxMS = 4 * maximum;
-		return true;
-	} else { 
-		return false;
+void SB_Servo::checkMaxMS() { 
+	if (maxUS < 0 || maxUS <= minUS) { 
+		errorCode |= CONFIG_ERROR_MASK;
+		errorCode |= 0x2
 	}
 }
 
-/** 
- *  READ THE setMaximumUS() comment in the .cpp and .hpp
- */
-bool SB_Servo::setMinimumUS(ms_t minimum) { 
-	if (minimum >= 0 && minimum < maxMS) { 
-		minMS = 4 * minimum;
-		return true;
-	} else { 
-		return false;
+void SB_Servo::checkMinDegreeRange() { 
+	if (minDegreeRange < 0 || minDegreeRange > maxDegreeRange) { 
+		errorCode |= CONFIG_ERROR_MASK;
+		errorCode |= 0x4;
 	}
 }
 
+void SB_Servo::checkMaxDegreeRange() { 
+	if (maxDegreeRange > 360 || maxDegreeRange < minDegreeRange ) { 
+		errorCode |= CONFIG_ERROR_MASK;
+		errorCode |= 0x8;
+	}
+}
+
+
+void SB_Servo::checkMinAngle() { 
+	if (minAngle < 0 || minAngle > maxAngle || 
+			minAngle < minDegreeRange) { 
+		errorCode |= CONFIG_ERROR_MASK;
+		errorCode |= 0x10
+	}
+}
+
+void  SB_Servo::checkMaxAngle() { 
+	if (maxAngle < 0 || maxAngle < minAngle || 
+			maxAngle > maxDegreeRange) { 
+		errorCode |= CONFIG_ERROR_MASK;
+		errorCode |= 0x20
+	}
+}
 
 float SB_Servo::getCurrentDegrees() { 
-	ms_t currentMS = maestro.getPosition(channelNum); // TODO: See what these return values are 
+	int currentMS = maestro.getPosition(channelNum); // TODO: See what these return values are 
 													  // and find a way to return -1 when theres comm failure
 	return msToDegrees(currentMS); 
 }
 
 
 bool SB_Servo::rotateToDegrees(float degree) { 
+	if (degree > maximumAngle) { 
+		degree = maximumAngle;
+	} 
+	if (degree < minimumAngle) { 
+		degree = minimumAngle;
+	}
 	int msToWrite = degToMS(degree);
-	if (msToWrite > maxMS) { 
-	   msToWrite = maxMS;	
-	} else if (msToWrite < minMS) {
-    
-		msToWrite = minMS;
+	if (msToWrite > maxUS) { 
+	   msToWrite = maxUS;	
+	} else if (msToWrite < minUS) { 
+		msToWrite = minUS;
 	}
 	if (channelNum == -1) { 
 		//throw std::runtime_error("Attempted to move Servo without assigning channel number");
@@ -103,14 +161,14 @@ bool SB_Servo::rotateToDegrees(float degree) {
 		// what Serial ports are going to be open. Perhaps we can return a boolean indicating 
 		// whether or not the rotate was successful
 		return false;
-	} else { 
-		maestro.setTarget(channelNum, msToWrite); // TODO: implement some sort of comm failure mode
-		return true;
-	}
+	} 
+	Serial.println(msToWrite);
+	maestro.setTarget(channelNum, msToWrite); // TODO: implement some sort of comm failure mode
+	return true;
 }
 
-bool SB_Servo::rotateBy(float degreesBy) { 
 
+bool SB_Servo::rotateBy(float degreesBy) { 
 	float currentDeg;
 	if (channelNum == -1) { 
 		return false; // Servo not connected yet 
@@ -124,16 +182,13 @@ bool SB_Servo::rotateBy(float degreesBy) {
 		// do enough of them and the system can get off by entire degrees without this fix 
 		currentDeg = (int) (getCurrentDegrees() + .5);  
 	}
-	ms_t desiredMS = degToMS(currentDeg + degreesBy);
-	if (desiredMS > maxMS || 
-		desiredMS < minMS) {
-   
+	int desiredMS = degToMS(currentDeg + degreesBy);
+	if (desiredMS > maxUS || 
+		desiredMS < minUS) {
 		return false;
-	} else { 
-    // Move the maestro, again this needs a failure mode
-		maestro.setTarget(channelNum, desiredMS);
-		
-		return true;
-	}
+	} 
+	// Move the maestro, again this needs a failure mode
+	maestro.setTarget(channelNum, desiredMS);
+	return true;
 }
 	
