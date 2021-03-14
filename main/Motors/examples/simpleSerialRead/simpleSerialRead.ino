@@ -1,5 +1,5 @@
 #include <SB_Servo.hpp>
-MiniMaestro maestro(Serial1);
+//MiniMaestro maestro(Serial1);
 
 
 // It appears as though it really does not want to include things that are not in the top level directory 

@@ -16,12 +16,14 @@
  */
 
 
-#include <PololuMaestro.h>
+
 // #include <stdexcept> arduino compiler doesnt like to throw errors
 #define DEBUG
 
 #ifndef SB_servo
 #define SB_servo
+#include <PololuMaestro.h>
+#include <string>
 
 #define CHANNEL_ERROR_BIT 0x40
 #define CONFIG_ERROR_BIT 0x80
@@ -46,11 +48,8 @@ class SB_Servo {
 		static MiniMaestro maestro;
 		// This is the number of servos we're using, the count increments for 
 		// each servo added	
-		static int servoCount = 0; 
-		const int servoNumber = 0;  // The identifier for this servo 
+		static int servoCount; 
 		int errorCode = 0;
-		const int channelNum; // default value for the channel, 
-						     // indicates the channel has not been assigned
 
 		/** 
 		 * These values are found from servo specific data sheets					 
@@ -70,13 +69,17 @@ class SB_Servo {
 		// For example, one of the HS475's goes from 3* to 200* 
 		const float minAngle; //default 0 
 		const float maxAngle; // default 180
+
+		const int channelNum; // default value for the channel, 
+						     // indicates the channel has not been assigned
+		const int servoNumber;  // The identifier for this servo 
 		
 
 		/** Convert a ms value into a degrees value
 		 * @param ms -- the ms to convert
 		 * @return the degrees in float form from 0 to 180
 		 */
-		float msToDegrees(int ms);
+		float usToDegrees(int ms);
 
 		/**
 		 * Convert traditional 0-180 degrees into ms for the maestro to use
@@ -126,8 +129,8 @@ class SB_Servo {
 		 * or all the way up to 180. This portion of the constructor will have to come
 		 * from experimental data and can not be specified by the manufacturer
 		 */ 
-		bool checkMinDegreeRange();
-		bool checkMaxDegreeRange();
+		void checkMinDegreeRange();
+		void checkMaxDegreeRange();
 
 		/** 
 		 * Sets the max angle
@@ -140,6 +143,7 @@ class SB_Servo {
 		 */
 		void checkMinAngle();
 		void checkMaxAngle();
+		void printDebug(String);
 
    	public: 
 		/** 
@@ -174,7 +178,7 @@ class SB_Servo {
 
 
 
-		SB_Servo(int minMS, int maxMS, float minRange, float maxRange, int channel);
+		SB_Servo(int minMS, int maxMS, float minRange, float maxRange, float minAngle, float maxAngle, int channel);
 
 
 		
@@ -194,7 +198,7 @@ class SB_Servo {
 		 * @return whether or not the Servo is properly connected to the Maestro, for example
 		 * if a channel number was never asserted then the Servo will do nothing and return false; 
 		 */
-		bool rotateToDegrees(float degrees);
+		void rotateToDegrees(float degrees);
 
 
 		/** 
@@ -209,4 +213,5 @@ class SB_Servo {
 		 */
 		void rotateBy(float degreesBy);
 };
+
 #endif
