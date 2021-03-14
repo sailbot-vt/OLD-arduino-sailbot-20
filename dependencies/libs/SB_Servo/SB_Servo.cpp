@@ -5,11 +5,11 @@
  * AHJ
  */
 
-#include "SB_Servo.hpp"
+//#include "SB_Servo.hpp"
 
 // Here the maestro is initialized to Serial1 on the Teensy, this is just one of 8 ports 
 // pretty neat. I suppose this is how static private variables are initialized
-  MiniMaestro SB_Servo::maestro(Serial1);
+  //MiniMaestro SB_Servo::maestro(Serial1);
 
 
 /** 
@@ -24,7 +24,6 @@ float SB_Servo::usToDegrees(int ms) {
 	return (degreeRangeTop / ((float) maxUS - minUS)) * (ms - minUS) + degreeRangeBottom;
 }
 
-
 SB_Servo::SB_Servo(int channel) : SB_Servo(DEFAULT_MIN_US, DEFAULT_MAX_US, channel) {}
 
 SB_Servo::SB_Servo(int minUS, int maxUS, int channel) : 
@@ -35,58 +34,49 @@ SB_Servo::SB_Servo(int minUS, int maxUS, int channel) :
 
 SB_Servo::SB_Servo(int minimumUS, int maximumUS, float minimumRange, float maximumRange, 
 	float minimumAngle, float maximumAngle, int channel) : 
+		minUS{4 * minimumUS},
+		maxUS{4 * maximumUS}, 
+		minDegreeRange{minimumRange},
+		maxDegreeRange{maximumRange},
+		minAngle{minimumAngle},
+		maxAngle{maximumangle},
+		channelNum{channel} 
+		servoNumber{servoCount++} 
+		{ 
 	
-	minUS{4 * minimumUS},
-	maxUS{4 * maximumUS}, 
-	degreeRangeTop
+	checkMinUS();	
+	checkMaxUS();	
+	checkMinDegreeRange();
+	checkMaxDegreeRange();
+	checkMinAngle();
+	checkMaxAngle();
+	checkChannel();
 
-
-
-
-
-{ 
-
-	setMinimumUS(minUS);
-	setMaximumUS(maxUS);
-	degreeRangeBottom = minRange;
-	degreeRangeTop = maxRange;
-	channelNum = channel;
 }
 
 
 
-bool SB_Servo::checkChannel() { 
-	/**
-	if (channelNum  >= 0 && channelNum <= 127) { 
-		channelNum = channel;	
-		return true;
-	} else {
-		return false;
-	}
-	*/
-	if (channelNum < 0 || channelNum > 127) { 
-		errorCode |= CONFIG_ERROR_MASK;
-		errorCode |= 0x40;
-	}
-}
 
 
 /** 
  *  READ THE setMaximumUS() comment in the .cpp and .hpp
  */
-void SB_Servo::checkMinMS(int minimum) { 
+void SB_Servo::checkMinMS() { 
 	/**
 	if (minimum >= 0 && 4 * minimum < maxUS) { 
 		minUS = 4 * minimum;
 	} else { 
-		errorCode |= CONFIG_ERROR_MASK;
+		errorCode |= CONFIG_ERROR_BIT;
 		errorCode |= 0x1
 	}
 	*/
 	if (minUS < 0 || minUS < maxUS) { 
-		errorCode |= CONFIG_ERROR_MASK;
+		errorCode |= CONFIG_ERROR_BIT;
 		errorCode |= 0x1;
 	}
+#ifdef DEBUG
+	Serial.println("checkMinMS() error");
+#endif
 }
 
 
@@ -98,80 +88,125 @@ void SB_Servo::checkMinMS(int minimum) {
  */
 void SB_Servo::checkMaxMS() { 
 	if (maxUS < 0 || maxUS <= minUS) { 
-		errorCode |= CONFIG_ERROR_MASK;
+		errorCode |= CONFIG_ERROR_BIT;
 		errorCode |= 0x2
 	}
+#ifdef DEBUG
+	Serial.println("checkMaxMS() error");
+#endif
 }
 
 void SB_Servo::checkMinDegreeRange() { 
 	if (minDegreeRange < 0 || minDegreeRange > maxDegreeRange) { 
-		errorCode |= CONFIG_ERROR_MASK;
+		errorCode |= CONFIG_ERROR_BIT;
 		errorCode |= 0x4;
 	}
+#ifdef DEBUG
+	Serial.println("checkMinDegreeRange() error");
+#endif
 }
 
 void SB_Servo::checkMaxDegreeRange() { 
 	if (maxDegreeRange > 360 || maxDegreeRange < minDegreeRange ) { 
-		errorCode |= CONFIG_ERROR_MASK;
+		errorCode |= CONFIG_ERROR_BIT;
 		errorCode |= 0x8;
 	}
+#ifdef DEBUG
+	Serial.println("checkMaxDegreeRange() error");
+#endif
 }
 
 
 void SB_Servo::checkMinAngle() { 
 	if (minAngle < 0 || minAngle > maxAngle || 
 			minAngle < minDegreeRange) { 
-		errorCode |= CONFIG_ERROR_MASK;
+		errorCode |= CONFIG_ERROR_BIT;
 		errorCode |= 0x10
 	}
+#ifdef DEBUG
+	Serial.println("checkMinAngle() error");
+#endif
 }
 
 void  SB_Servo::checkMaxAngle() { 
 	if (maxAngle < 0 || maxAngle < minAngle || 
 			maxAngle > maxDegreeRange) { 
-		errorCode |= CONFIG_ERROR_MASK;
+		errorCode |= CONFIG_ERROR_BIT;
 		errorCode |= 0x20
 	}
+#ifdef DEBUG
+	Serial.println("checkMaxAngle() error");
+#endif
+}
+
+bool SB_Servo::checkChannel() { 
+	/**
+	if (channelNum  >= 0 && channelNum <= 127) { 
+		channelNum = channel;	
+		return true;
+	} else {
+		return false;
+	}
+	*/
+	if (channelNum < 0 || channelNum > NUM_MAESTRO_CHANNELS) { 
+		errorCode |= CONFIG_ERROR_BIT;
+		errorCode |= CHANNEL_ERROR_BIT;
+	}
+#ifdef DEBUG
+	Serial.println("checkChannel() error");
+#endif
 }
 
 float SB_Servo::getCurrentDegrees() { 
-	int currentMS = maestro.getPosition(channelNum); // TODO: See what these return values are 
+	int currentUS = maestro.getPosition(channelNum); // TODO: See what these return values are 
 													  // and find a way to return -1 when theres comm failure
-	return msToDegrees(currentMS); 
+	return msToDegrees(currentUS); 
 }
 
 
 bool SB_Servo::rotateToDegrees(float degree) { 
 	if (degree > maximumAngle) { 
 		degree = maximumAngle;
+		errorCode |= ROTATE_TO_ERROR_BIT;
+		errorCode |= ANGLE_OVER_WARNING
+#ifdef DEBUG
+	Serial.println("Requested RotateTo() angle exceeds rating warning");
+#endif
 	} 
 	if (degree < minimumAngle) { 
 		degree = minimumAngle;
+		errorCode |= ROTATE_TO_ERROR_BIT;
+		errorCode |= ANGLE_UNDER_WARNING
+#ifdef DEBUG
+	Serial.println("Requested RotateTo() angle under rating warning");
+#endif
 	}
 	int msToWrite = degToMS(degree);
 	if (msToWrite > maxUS) { 
-	   msToWrite = maxUS;	
+	   msToWrite = maxUS; // I dont think this should ever be happening 	
+#ifdef DEBUG
+	Serial.println("Calculated us to write to servo exceeds rated maximum us"); 
+#endif
 	} else if (msToWrite < minUS) { 
 		msToWrite = minUS;
+#ifdef DEBUG
+	Serial.println("Calculated us to write to servo under rated minimum us"); 
+#endif
 	}
-	if (channelNum == -1) { 
-		//throw std::runtime_error("Attempted to move Servo without assigning channel number");
-		// figure out something to do, arduino compiler doesn't like to throw errors 
-		// I would normally make a std Serial output, but I don't want the code to assume
-		// what Serial ports are going to be open. Perhaps we can return a boolean indicating 
-		// whether or not the rotate was successful
-		return false;
-	} 
-	Serial.println(msToWrite);
-	maestro.setTarget(channelNum, msToWrite); // TODO: implement some sort of comm failure mode
+	checkChannel();
+	maestro.setTarget(channelNum, msToWrite); 
 	return true;
 }
 
 
-bool SB_Servo::rotateBy(float degreesBy) { 
+void SB_Servo::rotateBy(float degreesBy) { 
 	float currentDeg;
-	if (channelNum == -1) { 
-		return false; // Servo not connected yet 
+	checkChannel();
+	if (errorCode & CHANNEL_ERROR_BIT) { // Mask wit the channel error bit to see if we fucked up the channel num
+		return; // Servo not connected yet 
+#ifdef DEBUG
+	Serial.println("Bad channel num, aborting rotateBy()"); 
+#endif
 	} else { 
 		// Here we will call getCurrentDegrees() only once because it involves a two way
 		// transmission w/ the maestro, which we'll want to decrease the amount of times performed

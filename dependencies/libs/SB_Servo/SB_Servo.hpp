@@ -18,13 +18,17 @@
 
 #include <PololuMaestro.h>
 // #include <stdexcept> arduino compiler doesnt like to throw errors
+#define DEBUG
 
 #ifndef SB_servo
 #define SB_servo
 
-#define CONFIG_ERROR_MASK 0x80
-#define ROTATE_TO_ERROR_MASK 0x400
-#define ROTATE_BY_ERROR_MASK 0x800
+#define CHANNEL_ERROR_BIT 0x40
+#define CONFIG_ERROR_BIT 0x80
+#define ROTATE_TO_ERROR_BIT 0x800
+#define ROTATE_BY_ERROR_BIT 0x1000
+#define ANGLE_UNDER_WARNING  0x100
+#define ANGLE_OVER_WARNING  0x200
 
 #define DEFAULT_MIN_US 500
 #define DEFAULT_MAX_US 2500 
@@ -32,11 +36,18 @@
 #define DEFAULT_MIN_ANGLE 0  
 #define DEFAULT_MAX_ANGLE 180 
 
+
+#define NUM_MAESTRO_CHANNELS 8
+
 class SB_Servo { 
 	private: 
 		// We make the maestro static so that it's shared across all instances 
 		// of Servos
 		static MiniMaestro maestro;
+		// This is the number of servos we're using, the count increments for 
+		// each servo added	
+		static int servoCount = 0; 
+		const int servoNumber = 0;  // The identifier for this servo 
 		int errorCode = 0;
 		const int channelNum; // default value for the channel, 
 						     // indicates the channel has not been assigned
@@ -57,15 +68,15 @@ class SB_Servo {
 
 		// The ANGLES are maximum and minimum angles that a servo can go to, found experimentally
 		// For example, one of the HS475's goes from 3* to 200* 
-		const float maximumAngle; // default 180
-		const float minimumAngle; //default 0 
+		const float minAngle; //default 0 
+		const float maxAngle; // default 180
 		
 
 		/** Convert a ms value into a degrees value
 		 * @param ms -- the ms to convert
 		 * @return the degrees in float form from 0 to 180
 		 */
-		float msToDegrees(ms_t ms);
+		float msToDegrees(int ms);
 
 		/**
 		 * Convert traditional 0-180 degrees into ms for the maestro to use
@@ -74,7 +85,7 @@ class SB_Servo {
 		 * @param degrees -- the degrees in 0-180
 		 * @return the ms representation of the degrees
 		 */
-		ms_t degToMS(float degrees);  
+		int degToUS(float degrees);  
 
 		/** 
 		 * Sets the channel number for a particular system. Pretty straight forward
@@ -159,11 +170,11 @@ class SB_Servo {
 		 * Begins the Serial monitor on Serial1. This could be changed in the future
 		 * to be able to dictated by .xml or .yml file
 		 */
-		SB_Servo(ms_t minDegr, ms_t maxDegr, int channel);
+		SB_Servo(int minDegr, int maxDegr, int channel);
 
 
 
-		SB_Servo(ms_t minMS, ms_t maxMS, float minRange, float maxRange, int channel);
+		SB_Servo(int minMS, int maxMS, float minRange, float maxRange, int channel);
 
 
 		
@@ -196,6 +207,6 @@ class SB_Servo {
 		 * @param degreesBy -- the amount of degrees to turn by 
 		 * @return whether or not the requested operation was doable
 		 */
-		bool rotateBy(float degreesBy);
+		void rotateBy(float degreesBy);
 };
 #endif
