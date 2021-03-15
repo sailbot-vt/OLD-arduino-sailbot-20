@@ -10,21 +10,27 @@
 // Here the maestro is initialized to Serial1 on the Teensy, this is just one of 8 ports 
 // pretty neat. I suppose this is how static private variables are initialized
 MiniMaestro SB_Servo::maestro(Serial1);
-
-
 int SB_Servo::servoCount{0};
-/** 
- * uses point slope form to calculate a ms value for the maestro for a given degree
- */ 
 
+
+
+/** 
+ * uses point slope form to calculate a us value for the maestro for a given degree
+ */ 
 int SB_Servo::degToUS(float degree) {
 	return ((float) (maxUS - minUS) / maxDegreeRange) * (degree) + minUS;
 }
 
-
-float SB_Servo::usToDegrees(int ms) { 
-	return (maxDegreeRange / ((float) maxUS - minUS)) * (ms - minUS) + minDegreeRange;
+/**
+ * Converts microseconds to degrees
+ */
+float SB_Servo::usToDegrees(int us) { 
+	return (maxDegreeRange / ((float) maxUS - minUS)) * (us - minUS) + minDegreeRange;
 }
+
+
+
+
 
 SB_Servo::SB_Servo(int channel) : SB_Servo(DEFAULT_MIN_US, DEFAULT_MAX_US, channel) {}
 
@@ -78,7 +84,7 @@ void SB_Servo::checkMinUS() {
 /**
  * This method uses the manufacturer's maximum
  * So, for example the HS422 has a rating of 500us - 2500us, thus we pass 2500 here
- * The maestro will use 2000 - 10k ms. Don't ask me why the Maestro uses 4x larger values, it just does.
+ * The maestro will use 2000 - 10k us. Don't ask me why the Maestro uses 4x larger values, it just does.
  * See the .hpp for more info
  */
 void SB_Servo::checkMaxUS() { 
@@ -164,12 +170,12 @@ void SB_Servo::rotateToDegrees(float degree) {
 		errorCode |= ANGLE_UNDER_WARNING;
 		printDebug("Requested RotateTo() angle under rating warning");
 	}
-	int msToWrite = degToUS(degree);
-	if (msToWrite > maxUS) { 
-	   msToWrite = maxUS; // I dont think this should ever be happening 	
+	int usToWrite = degToUS(degree);
+	if (usToWrite > maxUS) { 
+	   usToWrite = maxUS; // I dont think this should ever be happening 	
 		printDebug("Calculated us to write to servo exceeds rated maximum us"); 
-	} else if (msToWrite < minUS) { 
-		msToWrite = minUS;
+	} else if (usToWrite < minUS) { 
+		usToWrite = minUS;
 		printDebug("Calculated us to write to servo under rated minimum us"); 
 	}
 	checkChannel();
@@ -177,7 +183,7 @@ void SB_Servo::rotateToDegrees(float degree) {
 		printDebug("Bad channel num, aborting rotateTo()"); 
 		return; // Servo not connected yet 
 	} else { 
-		maestro.setTarget(channelNum, msToWrite); 
+		maestro.setTarget(channelNum, usToWrite); 
 		return;
 	}
 }

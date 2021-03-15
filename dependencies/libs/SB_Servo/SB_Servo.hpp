@@ -23,8 +23,13 @@
 #ifndef SB_servo
 #define SB_servo
 #include <PololuMaestro.h>
-#include <string>
 
+/** 
+ * These are the error codes for our system, 
+ * See the documentation that I haven't written yet for 
+ * a full list detailing the error codes
+ * Im sure theres a better way to do than using binary but 
+ */
 #define CHANNEL_ERROR_BIT 0x40
 #define CONFIG_ERROR_BIT 0x80
 #define ROTATE_TO_ERROR_BIT 0x800
@@ -32,13 +37,23 @@
 #define ANGLE_UNDER_WARNING  0x100
 #define ANGLE_OVER_WARNING  0x200
 
+/**
+ * These are default values for instantiated servos
+ * the min/max us are the general guidelines for minimum and maximum
+ * microsecond pulse times of servos. 
+ * The default min angle and max angle are used as the default range of degrees of a servo
+ * most servos go from 0-180 believe it or not
+ */
 #define DEFAULT_MIN_US 500
 #define DEFAULT_MAX_US 2500 
 
 #define DEFAULT_MIN_ANGLE 0  
 #define DEFAULT_MAX_ANGLE 180 
 
-
+/**
+ * The number of servos that the maestro can handle
+ * This could change in the future if a different maestro were to be used
+ */
 #define NUM_MAESTRO_CHANNELS 8
 
 class SB_Servo { 
@@ -47,7 +62,8 @@ class SB_Servo {
 		// of Servos
 		static MiniMaestro maestro;
 		// This is the number of servos we're using, the count increments for 
-		// each servo added	
+		// each servo added. The servo count is used in debugging print values 
+		// as it provides a unique identifier for each servo 
 		static int servoCount; 
 		int errorCode = 0;
 
@@ -58,21 +74,26 @@ class SB_Servo {
 		 * 4x pulse widths, just how it works, thus we use 2k and 10k as
 		 * the default minimum and maximum pulses, these are modified in the parameterized constructor
 		 */
-		const int minUS; // default 500 
-		const int maxUS; //default 2500 
+		const int minUS; 		// default 500 
+		const int maxUS; 		//default 2500 
+
 		// The RANGES are manufacturer define ranges that the servo can move to 
 		// For example, most servos move between 0 and 180. However, some go from 0 to 200
-		const int minDegreeRange; //default: 180 
-		const int maxDegreeRange; // default: 0 
+		const int minDegreeRange; // default: 0 
+		const int maxDegreeRange; // default: 180  
 
 		// The ANGLES are maximum and minimum angles that a servo can go to, found experimentally
 		// For example, one of the HS475's goes from 3* to 200* 
-		const float minAngle; //default 0 
-		const float maxAngle; // default 180
+		// You can find out the min and max angles of a servo by using the 
+		// simpleSerialRead.ino program and finding where the servo start jittering.
+		// Some servos work fine for their full operational range and thus these min and max 
+		// Angles won't need to be modified in the constructor 
+		const float minAngle; 	//default 0 
+		const float maxAngle; 	// default 180
 
-		const int channelNum; // default value for the channel, 
-						     // indicates the channel has not been assigned
-		const int servoNumber;  // The identifier for this servo 
+		const int channelNum; 	// default value for the channel, 
+						     	// indicates the channel has not been assigned
+		const int servoNumber;  // The identifier for this servo taken from servoCount 
 		
 
 		/** Convert a ms value into a degrees value
@@ -90,35 +111,15 @@ class SB_Servo {
 		 */
 		int degToUS(float degrees);  
 
-		/** 
-		 * Sets the channel number for a particular system. Pretty straight forward
-		 *
-		 * Requires that the channel setting is within the  bounds for the maestro, 
-		 * 0 and 127.  
-		 * TODO: change 127 to the number of channels available in the MicroMaestro, 
-		 * obviously we don't have 127 channels, but there is a max num
-		 * @param channel -- the channel to assign this servo to 
-		 * @return whether or not the channel was set properly, the method only returns flase
-		 * if your provide a bad channel number
+		/**
+		 * Checks that the channel was set to a correct value 
+		 * TODO: fill in error code 
 		 */
 		void checkChannel();
 
 		/**
-		 * Sets the maximum possible us that this given servo can rotate to
-		 * Each servo has it's own possible maximum. These values are probably 
-		 * going to need to be stored in some sort of database or something 
-		 * This, along with min us or something like that 
-		 * 
-		 * THESE METHODS USE MICRO SECONDS, NOT MAESTRO MILLISECONDS *******
-		 * The maestro writes micro seconds to servos with a 4x scalar multiplier. Don't ask me why. 
-		 * Thus, when we use the manufacturer's rating of 500-2500us, the internal maximums for the class
-		 * are thus 2000-10k. WRITE TO THESE METHODS USING 500-2500us. If this doesnt make sense to you, 
-		 * Look up the HS422 - it has a maximum range of 500-2500us. 
-		 * Thus you would call this method, myHS422Servo.setMaximumUS(2500);
-		 * @param maximum -- the max us that the servo can rotate to 
-		 * @return whether or not the maximum was set properly 
-		 * 		   The method should really only return false if the max is less than the min
-		 * 		   Or if the value passed is less than 0
+		 * Check that the minimum and maximum values provided by the constructor 
+		 * make sense. Else throw error codes. TODO: fill in the error code values
 		 */
 		void checkMinUS();
 		void checkMaxUS();
@@ -128,39 +129,38 @@ class SB_Servo {
 		 * of a particular servo. Some servos do not like to go all the way down to 0 
 		 * or all the way up to 180. This portion of the constructor will have to come
 		 * from experimental data and can not be specified by the manufacturer
+		 *
+		 *
+		 * Simply checks that the min and max range specified makes sense
+		 * TODO: error 
 		 */ 
 		void checkMinDegreeRange();
 		void checkMaxDegreeRange();
 
 		/** 
-		 * Sets the max angle
-		 * @param angle -- the value to set to maxDegrees
-		 * 						which dictates the max value the servo can rotate to 
-		 * For now, you can't set a max angle over 180 or under 0 
+		 * checks the max/min angle
+		 * For now, you can't set a max angle over 360 or under 0 
 		 * It also cannot be set less than or equal to the minimum
-		 * @return error code 11 -- bad min angle
+		 * @return error code 11 -- bad min angle TODO: see if these are correct
 		 * @return error code 12 -- bad max angle
 		 */
 		void checkMinAngle();
 		void checkMaxAngle();
+
+		/**
+		 * Simply used to print debug lines if debug mode has been toggled on,
+		 * which can easily be done from line #20
+		 * @param String the string to print
+		 */
 		void printDebug(String);
 
    	public: 
-		/** 
-		 * Default constructor for the servo, I don't think 
-		 * this guy really needs to do anything
-		 * 
-		 * Begins the Serial monitor on Serial1. This could be changed in the future
-		 * to be able to dictated by .xml or .yml file
-		 */
-   		SB_Servo();
-
 		/**
 		 * Sets the channelNumber of a particular servo 
+		 * Calls the next few constructors using hte default values
+		 * as specified in the preprocessor directives 
 		 * @param channel the channel number to use, which is the pin on
 		 * the maestro that the servo is connected to 
-		 * Begins the Serial monitor on Serial1. This could be changed in the future
-		 * to be able to dictated by .xml or .yml file
 		 */
 		SB_Servo(int);
 
@@ -177,8 +177,20 @@ class SB_Servo {
 		SB_Servo(int minDegr, int maxDegr, int channel);
 
 
-
-		SB_Servo(int minMS, int maxMS, float minRange, float maxRange, float minAngle, float maxAngle, int channel);
+		/**
+		 * Big fat ass constructor and the final constructor to be called
+		 * All SB_Servo objects have to eventually call this method upon construction
+		 * It also performs a lot of configuration checks to set the error codes if 
+		 * a parameter in this is not set properly 
+		 * @param minUS -- the bottom of the range of the us of the servo 
+		 * @param maxUS -- the top of the range of the us of the servo 
+		 * @param  minRange -- the bottom degree of the servo
+		 * @param  maxRange -- the top degree of the servo
+		 * @param minAngle -- the experimentally found minimum angle the servo can move to 
+		 * @param maxAngle -- the experimentally found maximum angle the servo can move to 
+		 * @param channelNum -- the channel number this servo uses on the maestro
+		 */ 
+		SB_Servo(int minUS, int maxUS, float minRange, float maxRange, float minAngle, float maxAngle, int channel);
 
 
 		
