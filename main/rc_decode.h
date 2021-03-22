@@ -1,5 +1,6 @@
-#define TRIMPIN A4
-#define RUDDERPIN A5
+#define TRIMPIN 18
+#define RUDDERPIN 19
+#define CTRLPIN A8
 
 #define TRIMOUTPUT 2
 #define RUDDEROUTPUT 3
@@ -13,32 +14,47 @@
 #define RUDDERRANGE 3.64
 
 
-// Interrupt struct
-struct interruptStruct {
-  volatile unsigned long fallTime = 0;       // Microsecond time of last falling edge
-  volatile unsigned long riseTime = 0;       // Microsecond time of last rising edge
-  volatile float dutyCycle = 0;              // Duty Cycle %
-  volatile unsigned long lastRead = 0;       // Last interrupt time
+// Channel Struct
+/*  
+ * Struct for individual channels on the receiver
+ * 
+ * place more of these in the class as needed to account for each channel
+ * 
+ * Each channel is going to need it's own interrupt service routine (ISR)
+ * 
+ * Each channel is also going to need a function to scale it's values
+ * 
+ */
+struct channelStruct 
+{
+  volatile int pwmValue = 0;  // pos duty width in micro seconds
+  volatile int prevRead = 0;  // read on interrupt
 };
 
-class RCDecode {
+class RCDecode 
+{
     public:
 
         RCDecode();
 
-        float getScaledTrimOutput();
-        float getScaledRudderOutput();
+        int getRudderPWM();
+        int getTrimPWM();
 
-        static void trimPinInterrupt();
-        static void rudderPinInterrupt();
+        static void trimRising();
+        static void trimFalling();
+        static void rudderRising();
+        static void rudderFalling();
 
     private:
-        interruptStruct *trimStruct;
-        interruptStruct *rudderStruct;
-};
+        // trim channel (channel 3)
+        channelStruct* trimStruct;
 
-// quick change
-        
+        // rudder channel (channel 2)
+        channelStruct* rudderStruct;
+
+        // ctrl channel (channel 6) [NOT IMPLEMENTED]
+        channelStruct* ctrlStruct;
+};
 
 /**
    pinout !

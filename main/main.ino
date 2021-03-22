@@ -3,9 +3,11 @@
 //#include "PinChangeInt.h"
 #include <stdio.h>
 
-// initalize trimStruct and ruddeStruct
-interruptStruct *trimStruct = (interruptStruct *)malloc(sizeof(interruptStruct));
-interruptStruct *rudderStruct = (interruptStruct *)malloc(sizeof(interruptStruct));
+// initalize trimStruct, ruddeStruct, and ctrlStruct
+channelStruct *trimStruct = (channelStruct *)malloc(sizeof(channelStruct));
+channelStruct *rudderStruct = (channelStruct *)malloc(sizeof(channelStruct));
+//channelStruct *ctrlStruct = (interruptStruct *)malloc(sizeOf(interruptStruct));
+
 
 // initialize LiDAR struct
 //LiDARData *lidar_data = (LiDARData *)malloc(sizeof(LiDARData));
@@ -19,32 +21,14 @@ void setup(void) {
     setupRCDecode();
   
     // Start serial connection to beaglebone
-    Serial.begin(115200); 
+    //Serial.begin(115200); 
 
-    // Attach interrupt functions to change in pins
-    attachInterrupt(TRIMPIN, trimPinInterrupt, CHANGE);
-    attachInterrupt(RUDDERPIN, rudderPinInterrupt, CHANGE);
-
+    // Start serial connection to the Teensy 4.0
+    Serial.begin(9600);
 }
 
-char trim_duty_cycle_str[24];
-char rudder_duty_cycle_str[24];
-char lidar_str[24];
-
-void loop(void) {
-    // Get duty cycle for each pin and output over serial
-    sprintf(trim_duty_cycle_str, "Trim Val =  %f", getScaledTrimOutput(trimStruct->dutyCycle));
-    sprintf(rudder_duty_cycle_str, "Rudder Val =  %f", getScaledRudderOutput(rudderStruct->dutyCycle));
-    Serial.println(trim_duty_cycle_str);
-    Serial.println(rudder_duty_cycle_str);
-/*
-    // read LiDAR reading and print it over serial
-    readLiDARStruct(lidar_data);
-    if (lidar_data->data != -1) {
-      sprintf(lidar_str, "LiDAR Val =  %x", lidar_data->data);
-      Serial.println(lidar_str);
-    }
-    else Serial.println("BAD LiDAR VAL");
-*/
-    delay(50);
+void loop(void) 
+{
+  //Serial.print("Rudder: "); //Serial.print(getRudderPWM());
+  //Serial.println("Trim: "); //Serial.print(getTrimPWM());
 }
