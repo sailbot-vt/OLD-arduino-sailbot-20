@@ -23,6 +23,7 @@
 #ifndef SB_servo
 #define SB_servo
 #include <PololuMaestro.h>
+#include <vector>
 
 /** 
  * These are the error codes for our system, 
@@ -55,6 +56,7 @@
  * This could change in the future if a different maestro were to be used
  */
 #define NUM_MAESTRO_CHANNELS 8
+using maestro_units = uint16_t;
 
 class SB_Servo { 
 	private: 
@@ -224,6 +226,20 @@ class SB_Servo {
 		 * @return whether or not the requested operation was doable
 		 */
 		void rotateBy(float degreesBy);
+
+
+
+		/**
+		 * Moves servos at the exact same time  
+		 * @param servos -- a list of servos to move 
+		 *  THE SERVOS HAVE TO HAVE CONTIGUOUS CHANNEL NUMBERS	
+		 * For example, you have to use servos on channels 0, 1, 2, 3
+		 *
+		 * @param degrees -- the degrees to send to the servos. They match up respectively. For example 
+		 * degrees[0] is where to turn servos[0]  
+		 *
+		 */
+		static void setMultipleTargets(std::vector<SB_Servo> servos, std::vector<float> degrees);
 };
 
 #endif

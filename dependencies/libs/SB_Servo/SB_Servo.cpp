@@ -13,7 +13,6 @@ MiniMaestro SB_Servo::maestro(Serial1);
 int SB_Servo::servoCount{0};
 
 
-
 /** 
  * uses point slope form to calculate a us value for the maestro for a given degree
  */ 
@@ -28,10 +27,6 @@ float SB_Servo::usToDegrees(int us) {
 	return (maxDegreeRange / ((float) maxUS - minUS)) * (us - minUS) + minDegreeRange;
 }
 
-
-
-
-
 SB_Servo::SB_Servo(int channel) : SB_Servo(DEFAULT_MIN_US, DEFAULT_MAX_US, channel) {}
 
 SB_Servo::SB_Servo(int minUS, int maxUS, int channel) : 
@@ -42,7 +37,7 @@ SB_Servo::SB_Servo(int minUS, int maxUS, int channel) :
 
 SB_Servo::SB_Servo(int minimumUS, int maximumUS, float minimumRange, float maximumRange, 
 	float minimumAngle, float maximumAngle, int channel) : 
-		minUS(4 * minimumUS),
+		minUS(4 * minimumUS), // Remember, the maestro uses 4x us from manufacturer specs
 		maxUS(4 * maximumUS), 
 		minDegreeRange(minimumRange),
 		maxDegreeRange(maximumRange),
@@ -222,5 +217,27 @@ void SB_Servo::printDebug(String printMe) {
 	Serial.println(String(printMe));
 #endif
 }
+
+void SB_Servo::setMultipleTargets(std::vector<SB_Servo> servos, std::vector<float> degrees) { 
+
+
+	// Need to make sure the channels are contiguous
+	for (int i = 0; i < servos.size() - 1; i++) { 
+		if (servos[i].channelNum + 1 != servos[i + 1].channelNum ) { 
+			// Make an issue!!!!
+			servos[i].printDebug("Continuity is wrong in setMultipleTargets!!!"); 
+		}
+	}
+
+	maestro_units targets[NUM_MAESTRO_CHANNELS];
+	for (int i = 0; i < degrees.size(); i++) { 
+		targets[i] = servos[i].degToUS(degrees[i]); 
+	}
+	int numberOfServosToMove = servos.size();
+	int firstChannel = servos[0].channelNum; 
+	maestro.setMultiTarget(numberOfServosToMove, firstChannel, &targets[0]);
+}
+
+
 
 	
