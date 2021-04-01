@@ -1,4 +1,3 @@
-#include "rc_decode.h"
 
 // Initialization function
 void initPWM()
