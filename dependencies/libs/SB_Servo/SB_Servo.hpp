@@ -31,10 +31,14 @@
  * a full list detailing the error codes
  * Im sure theres a better way to do than using binary but 
  */
-#define CHANNEL_ERROR_BIT 0x40
-#define CONFIG_ERROR_BIT 0x80
-#define ROTATE_TO_ERROR_BIT 0x800
-#define ROTATE_BY_ERROR_BIT 0x1000
+#define MS_ERROR_BIT 0x01
+#define RANGE_ERROR_BIT 0x02
+#define ANGLE_ERROR_BIT 0x04
+#define CHANNEL_ERROR_BIT 0x08
+#define ROTATE_TO_UNDER_ERROR_BIT 0x10
+#define ROTATE_TO_OVER_ERROR_BIT 0x20
+#define ROTATE_BY_OVER_ERROR_BIT 0x40
+#define ROTATE_BY_UNDER_ERROR_BIT 0x80
 #define ANGLE_UNDER_WARNING  0x100
 #define ANGLE_OVER_WARNING  0x200
 
@@ -226,6 +230,9 @@ class SB_Servo {
 		 * @return whether or not the requested operation was doable
 		 */
 		void rotateBy(float degreesBy);
+
+
+		int getErrorCode();
 
 
 

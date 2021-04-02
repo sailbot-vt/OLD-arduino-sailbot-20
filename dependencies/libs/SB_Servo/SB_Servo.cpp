@@ -69,8 +69,7 @@ void SB_Servo::checkMinUS() {
 	}
 	*/
 	if (minUS < 0 || minUS < maxUS) { 
-		errorCode |= CONFIG_ERROR_BIT;
-		errorCode |= 0x1;
+		errorCode |= MS_ERROR_BIT;
 		printDebug("checkMinUS() error");
 	}
 }
@@ -84,24 +83,21 @@ void SB_Servo::checkMinUS() {
  */
 void SB_Servo::checkMaxUS() { 
 	if (maxUS < 0 || maxUS <= minUS) { 
-		errorCode |= CONFIG_ERROR_BIT;
-		errorCode |= 0x2;
+		errorCode |= MS_ERROR_BIT;
 		printDebug("checkMaxMS() error");
 	}
 }
 
 void SB_Servo::checkMinDegreeRange() { 
 	if (minDegreeRange < 0 || minDegreeRange > maxDegreeRange) { 
-		errorCode |= CONFIG_ERROR_BIT;
-		errorCode |= 0x4;
+		#define RANGE_ERROR_BIT 0x02
 		printDebug("checkMinDegreeRange() error");
 	}
 }
 
 void SB_Servo::checkMaxDegreeRange() { 
 	if (maxDegreeRange > 360 || maxDegreeRange < minDegreeRange ) { 
-		errorCode |= CONFIG_ERROR_BIT;
-		errorCode |= 0x8;
+		#define RANGE_ERROR_BIT 0x02
 		printDebug("checkMaxDegreeRange() error");
 	}
 }
@@ -110,8 +106,7 @@ void SB_Servo::checkMaxDegreeRange() {
 void SB_Servo::checkMinAngle() { 
 	if (minAngle < 0 || minAngle > maxAngle || 
 			minAngle < minDegreeRange) { 
-		errorCode |= CONFIG_ERROR_BIT;
-		errorCode |= 0x10;
+		#define CHANNEL_ERROR_BIT 0x08
 		printDebug("checkMinAngle() error");
 	}
 }
@@ -119,23 +114,13 @@ void SB_Servo::checkMinAngle() {
 void  SB_Servo::checkMaxAngle() { 
 	if (maxAngle < 0 || maxAngle < minAngle || 
 			maxAngle > maxDegreeRange) { 
-		errorCode |= CONFIG_ERROR_BIT;
-		errorCode |= 0x20;
+		#define CHANNEL_ERROR_BIT 0x08
 		printDebug("checkMaxAngle() error");
 	}
 }
 
 void SB_Servo::checkChannel() { 
-	/**
-	if (channelNum  >= 0 && channelNum <= 127) { 
-		channelNum = channel;	
-		return true;
-	} else {
-		return false;
-	}
-	*/
 	if (channelNum < 0 || channelNum > NUM_MAESTRO_CHANNELS) { 
-		errorCode |= CONFIG_ERROR_BIT;
 		errorCode |= CHANNEL_ERROR_BIT;
 		printDebug("checkChannel() error");
 	}
@@ -217,6 +202,11 @@ void SB_Servo::printDebug(String printMe) {
 	Serial.println(String(printMe));
 #endif
 }
+
+int SB_Servo::getErrorCode() { 
+	return errorCode;
+}
+
 
 void SB_Servo::setMultipleTargets(std::vector<SB_Servo> servos, std::vector<float> degrees) { 
 
