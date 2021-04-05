@@ -56,18 +56,15 @@ SB_Servo::SB_Servo(int minimumUS, int maximumUS, float minimumRange, float maxim
 
 }
 
+// In the the future these methods can be shortened and all put together
+// For example minUS and maxUS can be the same method
+// but for now I'm just going to leave them be there are other things to do 
+
+
 /** 
  *  READ THE setMaximumUS() comment in the .cpp and .hpp
  */
 void SB_Servo::checkMinUS() { 
-	/**
-	if (minimum >= 0 && 4 * minimum < maxUS) { 
-		minUS = 4 * minimum;
-	} else { 
-		errorCode |= CONFIG_ERROR_BIT;
-		errorCode |= 0x1
-	}
-	*/
 	if (minUS < 0 || minUS < maxUS) { 
 		errorCode |= MS_ERROR_BIT;
 		printDebug("checkMinUS() error");
@@ -90,14 +87,14 @@ void SB_Servo::checkMaxUS() {
 
 void SB_Servo::checkMinDegreeRange() { 
 	if (minDegreeRange < 0 || minDegreeRange > maxDegreeRange) { 
-		#define RANGE_ERROR_BIT 0x02
+		errorCode |= RANGE_ERROR_BIT; 
 		printDebug("checkMinDegreeRange() error");
 	}
 }
 
 void SB_Servo::checkMaxDegreeRange() { 
 	if (maxDegreeRange > 360 || maxDegreeRange < minDegreeRange ) { 
-		#define RANGE_ERROR_BIT 0x02
+		errorCode |= RANGE_ERROR_BIT; 
 		printDebug("checkMaxDegreeRange() error");
 	}
 }
@@ -106,7 +103,7 @@ void SB_Servo::checkMaxDegreeRange() {
 void SB_Servo::checkMinAngle() { 
 	if (minAngle < 0 || minAngle > maxAngle || 
 			minAngle < minDegreeRange) { 
-		#define CHANNEL_ERROR_BIT 0x08
+		errorCode |= ANGLE_ERROR_BIT;
 		printDebug("checkMinAngle() error");
 	}
 }
@@ -114,7 +111,7 @@ void SB_Servo::checkMinAngle() {
 void  SB_Servo::checkMaxAngle() { 
 	if (maxAngle < 0 || maxAngle < minAngle || 
 			maxAngle > maxDegreeRange) { 
-		#define CHANNEL_ERROR_BIT 0x08
+		errorCode |= ANGLE_ERROR_BIT;
 		printDebug("checkMaxAngle() error");
 	}
 }
@@ -140,32 +137,21 @@ float SB_Servo::getCurrentDegrees() {
 void SB_Servo::rotateToDegrees(float degree) { 
 	if (degree > maxAngle) { 
 		degree = maxAngle;
-		errorCode |= ROTATE_TO_ERROR_BIT;
-		errorCode |= ANGLE_OVER_WARNING;
+		errorCode |= ROTATE_TO_OVER_ERROR_BIT;
 		printDebug("Requested RotateTo() angle exceeds rating warning");
-	} 
-	if (degree < minAngle) { 
+	} else if (degree < minAngle) { 
 		degree = minAngle;
-		errorCode |= ROTATE_TO_ERROR_BIT;
-		errorCode |= ANGLE_UNDER_WARNING;
+		errorCode |= ROTATE_TO_UNDER_ERROR_BIT;
 		printDebug("Requested RotateTo() angle under rating warning");
 	}
 	int usToWrite = degToUS(degree);
-	if (usToWrite > maxUS) { 
-	   usToWrite = maxUS; // I dont think this should ever be happening 	
-		printDebug("Calculated us to write to servo exceeds rated maximum us"); 
-	} else if (usToWrite < minUS) { 
-		usToWrite = minUS;
-		printDebug("Calculated us to write to servo under rated minimum us"); 
-	}
 	checkChannel();
 	if (errorCode & CHANNEL_ERROR_BIT) { // Mask wit the channel error bit to see if we fucked up the channel num
 		printDebug("Bad channel num, aborting rotateTo()"); 
 		return; // Servo not connected yet 
-	} else { 
-		maestro.setTarget(channelNum, usToWrite); 
-		return;
-	}
+	} 
+	maestro.setTarget(channelNum, usToWrite); 
+	return;
 }
 
 
@@ -175,22 +161,23 @@ void SB_Servo::rotateBy(float degreesBy) {
 	if (errorCode & CHANNEL_ERROR_BIT) { // Mask wit the channel error bit to see if we fucked up the channel num
 		printDebug("Bad channel num, aborting rotateBy()"); 
 		return; // Servo not connected yet 
-	} else { 
-		currentDeg = (int) (getCurrentDegrees() + .5);  
+	} 
+	currentDeg = (int) (getCurrentDegrees() + .5); // round down to make life easier and stop errors
+	float desiredAngle = currentDeg + degreesBy;	
+	if (desiredAngle > maxAngle) { 
+		errorCode |= ROTATE_BY_OVER_ERROR_BIT;
+		printDebug("Requested rotateBy() angle over rating warning, defaulting");
+		desiredAngle = maxAngle;
+	} else if (desiredAngle < minAngle) { 
+		errorCode |= ROTATE_BY_UNDER_ERROR_BIT;
+		printDebug("Requested rotateBy() angle under rating warning, defaulting");
+		desiredAngle = minAngle;
 	}
-	int desiredUS = degToUS(currentDeg + degreesBy);
-	if (desiredUS > maxUS) {
-		errorCode |= ROTATE_BY_ERROR_BIT;
-		errorCode |= ANGLE_OVER_WARNING;
-		printDebug("Requested rotateBy() angle over rating warning");
-		desiredUS = maxUS;
-	} else if (desiredUS < minUS) { 
-		errorCode |= ROTATE_BY_ERROR_BIT;
-		errorCode |= ANGLE_UNDER_WARNING;
-		printDebug("Requested rotateBy() angle under rating warning");
-		desiredUS = minUS;
-	}
-	// Move the maestro, again this needs a failure mode
+	// Don't need to check this. 
+	// us can't be calculated outside of tolerable range
+	// max / min us also should not be used for bounds checking because they most likely
+	// exceed what the angle allows for 
+	int desiredUS = degToUS(desiredAngle); 
 	maestro.setTarget(channelNum, desiredUS);
 }
 
@@ -209,8 +196,6 @@ int SB_Servo::getErrorCode() {
 
 
 void SB_Servo::setMultipleTargets(std::vector<SB_Servo> servos, std::vector<float> degrees) { 
-
-
 	// Need to make sure the channels are contiguous
 	for (int i = 0; i < servos.size() - 1; i++) { 
 		if (servos[i].channelNum + 1 != servos[i + 1].channelNum ) { 

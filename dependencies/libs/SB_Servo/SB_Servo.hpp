@@ -39,8 +39,6 @@
 #define ROTATE_TO_OVER_ERROR_BIT 0x20
 #define ROTATE_BY_OVER_ERROR_BIT 0x40
 #define ROTATE_BY_UNDER_ERROR_BIT 0x80
-#define ANGLE_UNDER_WARNING  0x100
-#define ANGLE_OVER_WARNING  0x200
 
 /**
  * These are default values for instantiated servos
