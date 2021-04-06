@@ -65,12 +65,11 @@ SB_Servo::SB_Servo(int minimumUS, int maximumUS, float minimumRange, float maxim
  *  READ THE setMaximumUS() comment in the .cpp and .hpp
  */
 void SB_Servo::checkMinUS() { 
-	if (minUS < 0 || minUS < maxUS) { 
-		errorCode |= MS_ERROR_BIT;
+	if (minUS < 0 || minUS > maxUS) { 
+		errorCode |= US_ERROR_BIT;
 		printDebug("checkMinUS() error");
 	}
 }
-
 
 /**
  * This method uses the manufacturer's maximum
@@ -80,7 +79,7 @@ void SB_Servo::checkMinUS() {
  */
 void SB_Servo::checkMaxUS() { 
 	if (maxUS < 0 || maxUS <= minUS) { 
-		errorCode |= MS_ERROR_BIT;
+		errorCode |= US_ERROR_BIT;
 		printDebug("checkMaxMS() error");
 	}
 }
@@ -194,6 +193,9 @@ int SB_Servo::getErrorCode() {
 	return errorCode;
 }
 
+void SB_Servo::clearErrorCode() { 
+	errorCode = 0;
+}
 
 void SB_Servo::setMultipleTargets(std::vector<SB_Servo> servos, std::vector<float> degrees) { 
 	// Need to make sure the channels are contiguous
@@ -204,7 +206,7 @@ void SB_Servo::setMultipleTargets(std::vector<SB_Servo> servos, std::vector<floa
 		}
 	}
 
-	maestro_units targets[NUM_MAESTRO_CHANNELS];
+	uint16_t targets[NUM_MAESTRO_CHANNELS];
 	for (int i = 0; i < degrees.size(); i++) { 
 		targets[i] = servos[i].degToUS(degrees[i]); 
 	}

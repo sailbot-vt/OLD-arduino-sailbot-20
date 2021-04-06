@@ -6,32 +6,32 @@
  * The class utilizes the Servo controller, the Pololu Mini Maestro 
  * and is written for the Teensy 4.0, 3.2 platforms, which can be compiled and 
  * uploaded using the Arduino IDE 
- * directory referencing:
  *
  *
  * By convention this program uses: 
- * `floats` for floating point numbers as the double is just not needed 
+ * `floats` for floating point numbers as the double are just not needed 
  *
  * AHJ
  */
 
 
-
-// #include <stdexcept> arduino compiler doesnt like to throw errors
-#define DEBUG
+// Defining debug allows runtime debug statements to be printed to the Serial monitor
+// this most likely will need to be turned off in production as no one will be watching
+// the Serial monitor 
+#define DEBUG 
 
 #ifndef SB_servo
 #define SB_servo
 #include <PololuMaestro.h>
-#include <vector>
+#include <vector> // Needed for set multiple targets
 
 /** 
  * These are the error codes for our system, 
  * See the documentation that I haven't written yet for 
  * a full list detailing the error codes
- * Im sure theres a better way to do than using binary but 
  */
-#define MS_ERROR_BIT 0x01
+
+#define US_ERROR_BIT 0x01
 #define RANGE_ERROR_BIT 0x02
 #define ANGLE_ERROR_BIT 0x04
 #define CHANNEL_ERROR_BIT 0x08
@@ -58,7 +58,6 @@
  * This could change in the future if a different maestro were to be used
  */
 #define NUM_MAESTRO_CHANNELS 8
-using maestro_units = uint16_t;
 
 class SB_Servo { 
 	private: 
@@ -69,6 +68,11 @@ class SB_Servo {
 		// each servo added. The servo count is used in debugging print values 
 		// as it provides a unique identifier for each servo 
 		static int servoCount; 
+
+		/** 
+		 * Error codes are logical OR'd with this member, it serves as a way
+		 * of keeping track of what errrors have happened
+		 */
 		int errorCode = 0;
 
 		/** 
@@ -100,30 +104,32 @@ class SB_Servo {
 		const int servoNumber;  // The identifier for this servo taken from servoCount 
 		
 
-		/** Convert a ms value into a degrees value
-		 * @param ms -- the ms to convert
+		/** 
+		 * Convert a us value into a degrees value
+		 * @param ms -- the us to convert
 		 * @return the degrees in float form from 0 to 180
 		 */
-		float usToDegrees(int ms);
+		float usToDegrees(int us);
 
 		/**
-		 * Convert traditional 0-180 degrees into ms for the maestro to use
+		 * Convert traditional 0-180 degrees into us for the maestro to use
 		 * the maestro uses ms for calculating servo angles, thus this method
-		 * acts as an interface from human readable degrees to ms, which the machine uses
+		 * acts as an interface from human readable degrees to us, which the machine uses
 		 * @param degrees -- the degrees in 0-180
-		 * @return the ms representation of the degrees
+		 * @return the us representation of the degrees
 		 */
 		int degToUS(float degrees);  
 
 		/**
 		 * Checks that the channel was set to a correct value 
-		 * TODO: fill in error code 
+		 * @sets CHANNEL_ERROR_BIT
 		 */
 		void checkChannel();
 
 		/**
 		 * Check that the minimum and maximum values provided by the constructor 
 		 * make sense. Else throw error codes. TODO: fill in the error code values
+		 * @sets US_ERROR_BIT
 		 */
 		void checkMinUS();
 		void checkMaxUS();
@@ -136,7 +142,7 @@ class SB_Servo {
 		 *
 		 *
 		 * Simply checks that the min and max range specified makes sense
-		 * TODO: error 
+		 * @sets RANGE_ERROR_BIT
 		 */ 
 		void checkMinDegreeRange();
 		void checkMaxDegreeRange();
@@ -145,8 +151,7 @@ class SB_Servo {
 		 * checks the max/min angle
 		 * For now, you can't set a max angle over 360 or under 0 
 		 * It also cannot be set less than or equal to the minimum
-		 * @return error code 11 -- bad min angle TODO: see if these are correct
-		 * @return error code 12 -- bad max angle
+		 * @sets ANGLE_ERROR_BIT
 		 */
 		void checkMinAngle();
 		void checkMaxAngle();
@@ -213,6 +218,8 @@ class SB_Servo {
 		 * @param degrees -- the degrees to rotate to 
 		 * @return whether or not the Servo is properly connected to the Maestro, for example
 		 * if a channel number was never asserted then the Servo will do nothing and return false; 
+		 * @sets ROTATE_TO_UNDER_ERROR_BIT
+		 * @sets ROTATE_TO_OVER_ERROR_BIT
 		 */
 		void rotateToDegrees(float degrees);
 
@@ -226,11 +233,22 @@ class SB_Servo {
 		 * fails 
 		 * @param degreesBy -- the amount of degrees to turn by 
 		 * @return whether or not the requested operation was doable
+		 * @sets ROTATE_BY_UNDER_ERROR_BIT
+		 * @sets ROTATE_BY_OVER_ERROR_BIT
 		 */
 		void rotateBy(float degreesBy);
 
-
+		/**
+		 * gets the current error code for this servo object
+		 * @return the current errorcode
+		 */
 		int getErrorCode();
+		/**
+		 * sets the current errorcode to 0
+		 * thereby effectively 'clearing' the code
+		 * to a clean slate
+		 */
+		void clearErrorCode();
 
 
 
@@ -239,6 +257,7 @@ class SB_Servo {
 		 * @param servos -- a list of servos to move 
 		 *  THE SERVOS HAVE TO HAVE CONTIGUOUS CHANNEL NUMBERS	
 		 * For example, you have to use servos on channels 0, 1, 2, 3
+		 * THIS METHOD IS UN TESTED AS IT'S NOT ANTICIPATED TO BE USED 4/6/2021... it probably works though there's just no error codes
 		 *
 		 * @param degrees -- the degrees to send to the servos. They match up respectively. For example 
 		 * degrees[0] is where to turn servos[0]  

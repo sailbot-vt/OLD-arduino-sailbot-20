@@ -34,7 +34,8 @@ void setup() {
 void loop() { 
   if (!loopOnce) {
     // End of test
-  } else { 
+  }
+else { 
 	double angle = 0;
 	int rotateBy = 0;
 	while (angle <= 180) { 
