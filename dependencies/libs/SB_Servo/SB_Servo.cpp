@@ -8,13 +8,12 @@
 #include "SB_Servo.hpp"
 
 // Here the maestro is initialized to Serial1 on the Teensy, this is just one of 8 ports 
-// pretty neat. I suppose this is how static private variables are initialized
 MiniMaestro SB_Servo::maestro(Serial1);
 int SB_Servo::servoCount{0};
 
 
 /** 
- * uses point slope form to calculate a us value for the maestro for a given degree
+ * Uses point slope form to calculate a us value for the maestro for a given degree
  */ 
 int SB_Servo::degToUS(float degree) {
 	return ((float) (maxUS - minUS) / maxDegreeRange) * (degree) + minUS;
@@ -116,7 +115,7 @@ void  SB_Servo::checkMaxAngle() {
 }
 
 void SB_Servo::checkChannel() { 
-	if (channelNum < 0 || channelNum > NUM_MAESTRO_CHANNELS) { 
+	if (channelNum < 0 || channelNum >= NUM_MAESTRO_CHANNELS) { 
 		errorCode |= CHANNEL_ERROR_BIT;
 		printDebug("checkChannel() error");
 	}
@@ -145,7 +144,7 @@ void SB_Servo::rotateToDegrees(float degree) {
 	}
 	int usToWrite = degToUS(degree);
 	checkChannel();
-	if (errorCode & CHANNEL_ERROR_BIT) { // Mask wit the channel error bit to see if we fucked up the channel num
+	if (errorCode & CHANNEL_ERROR_BIT) { // Mask w/ error bit to see if channelNumber isn't set properly
 		printDebug("Bad channel num, aborting rotateTo()"); 
 		return; // Servo not connected yet 
 	} 
@@ -157,11 +156,11 @@ void SB_Servo::rotateToDegrees(float degree) {
 void SB_Servo::rotateBy(float degreesBy) { 
 	float currentDeg;
 	checkChannel();
-	if (errorCode & CHANNEL_ERROR_BIT) { // Mask wit the channel error bit to see if we fucked up the channel num
+	if (errorCode & CHANNEL_ERROR_BIT) { 
 		printDebug("Bad channel num, aborting rotateBy()"); 
 		return; // Servo not connected yet 
 	} 
-	currentDeg = (int) (getCurrentDegrees() + .5); // round down to make life easier and stop errors
+	currentDeg = (int) (getCurrentDegrees() + .5); // Round down to make life easier and stop errors
 	float desiredAngle = currentDeg + degreesBy;	
 	if (desiredAngle > maxAngle) { 
 		errorCode |= ROTATE_BY_OVER_ERROR_BIT;

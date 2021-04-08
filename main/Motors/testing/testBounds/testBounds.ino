@@ -1,5 +1,7 @@
 /**
  * Runs using the 475 servo connected to channel 0 on the maestro
+ * Performs some quick tests to make sure the 
+ * bounds passed in the constructors are respected
  * 
  * AHJ
  */

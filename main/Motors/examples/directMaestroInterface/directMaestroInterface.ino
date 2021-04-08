@@ -1,5 +1,10 @@
 /** 
 	A very minimalist setup for checking to make sure the maestro is working properly
+	By passing integers to the Serial monitor and having the maestro move to those locations
+	You'll also need to pass values that are 4x the manufacturer microseconds value.
+
+	If you have a 0-180* servo w/ 500-2500 us, you would type 2000 in the Serial
+	monitor to move to 0* 
 	Needs: minimaestro, teensy 3.2, 5V power supply for maestro
 
 	Connections are as follows: Maestro Rx -> teensy Tx
@@ -8,6 +13,8 @@
 	Maestro Vin -> powersupply 5V
 	Teensy connected via usb
 	1 servo attached to the maestro's first slot
+
+	AHJ
 */
 #include <PololuMaestro.h>
 #include <vector> 

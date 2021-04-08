@@ -5,7 +5,6 @@
  * The program increments the servo in the 0th channel
  * from 0 to around 180, then decrements back to 0. 
  * The test results can be read on the serial monitor.
-nckjdscnskjcnh
  * 
  * AHJ
  */

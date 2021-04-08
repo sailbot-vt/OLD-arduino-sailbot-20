@@ -1,7 +1,12 @@
 #include <SB_Servo.hpp>
 
 /**
-	simple test using the 475 w/ some specific bounds
+This file is for testing the error reporting on the SB_Servo class 
+Here we instantiate a bunch of different servos objects all on the same channel
+But give them all bad constructors, then check to make sure the correct error codes are raised
+on the objects
+
+AHJ
 */
 
 
@@ -13,40 +18,39 @@ bool loopOnce;
 void setup() { 
 	Serial.begin(9600);
 	Serial1.begin(9600);
-  loopOnce = true;
-  delay(1000);
-	/**
-	Going to instantiate a bunch of 
-	objects inorder to throw some errors
-	*/
+	loopOnce = true;
+	delay(1000);
 	
 }
 
 void loop() {
 
   if (!loopOnce)  { 
-//    //SSerial.println("Here");
-  } 
-  else { 
+  
+  } else { 
+	/**
+	Going to instantiate a bunch of 
+	objects inorder to throw some errors
+	*/
     SB_Servo controlServo(500, 2500, 0, 200, 3, 200, 0);
 
-  SB_Servo negMinMS(-2, 200, 0, 200, 3, 200, 0); 
-  SB_Servo negMaxMS(0, -1, 0, 200, 3, 200, 0); 
-  SB_Servo badMS(250, 200, 0, 200, 3, 200, 0); 
+	SB_Servo negMinMS(-2, 200, 0, 200, 3, 200, 0); 
+	SB_Servo negMaxMS(0, -1, 0, 200, 3, 200, 0); 
+	SB_Servo badMS(250, 200, 0, 200, 3, 200, 0); 
 
-  SB_Servo minRangeNegative(500, 2500, -1, 200, 3, 200, 0); 
-  SB_Servo maxRangeNegative(500, 2500, 0, -1, 3, 200, 0); 
-  SB_Servo badRange(500, 2500, 215, 200, 3, 200, 0); 
+	SB_Servo minRangeNegative(500, 2500, -1, 200, 3, 200, 0); 
+	SB_Servo maxRangeNegative(500, 2500, 0, -1, 3, 200, 0); 
+  	SB_Servo badRange(500, 2500, 215, 200, 3, 200, 0); 
 
-  SB_Servo minAngleNegative(500, 2500, 0, 200, -1, 200, 0); 
-  SB_Servo maxAngleNegative(500, 2500, 0, 200, 0, -3, 0); 
-  SB_Servo badAngle(500, 2500, 0, 200, 150, 50, 0); 
+    SB_Servo minAngleNegative(500, 2500, 0, 200, -1, 200, 0); 
+    SB_Servo maxAngleNegative(500, 2500, 0, 200, 0, -3, 0); 
+    SB_Servo badAngle(500, 2500, 0, 200, 150, 50, 0); 
 
-  SB_Servo angleUnderRange(500, 2500, 50, 200, 40, 200, 0); 
-  SB_Servo angleOverRange(500, 2500, 0, 200, 3, 250, 0); 
-  SB_Servo angleOutOfBounds(500, 2500, 50, 150, 0, 200, 0); 
-  SB_Servo badChannelNum(500, 2500, 0, 200, 3, 200, 9);  // bad channel number
-    
+    SB_Servo angleUnderRange(500, 2500, 50, 200, 40, 200, 0); 
+  	SB_Servo angleOverRange(500, 2500, 0, 200, 3, 250, 0); 
+  	SB_Servo angleOutOfBounds(500, 2500, 50, 150, 0, 200, 0); 
+  	SB_Servo badChannelNum(500, 2500, 0, 200, 3, 200, 9);  // bad channel number
+		
     
   	Serial.print("Expected error code for negative minimum us: ");
   	Serial.println(US_ERROR_BIT); 
