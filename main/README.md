@@ -120,7 +120,7 @@ To begin measuring the pulse width of a PWM signal with the pwmChannel struct yo
 1. Computer capable of communicating with an Arduino and/or Teensy board via a USB capable.
 2. Arduino or Teensy platform with support for functions found in the "Arduino.h" library (Other platforms may work provided they support Arduino based functions)
 3. AR620 six channel RC receiver (Other receivers will likely work however, measurements should be carried out to ensure correct readings prior to use in an actual setting)
-4. RC Radio Transmitter paired to the AR620 RC receiver (or the RC reciever being used in place)
+4. RC Radio Transmitter paired to the AR620 RC receiver (or the RC receiver being used in place)
 5. Voltage supply capable of delivering a minimum of 3.5V DC to supply the AR620 RC receiver (don't put more than 9V DC across it)
 6. Jumper wires (male to male, female to male, female to male) The AR620 provides a male pin so it needs a female to female / male jumper wire depending on what you wish to connect it to.
 
