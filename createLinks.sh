@@ -21,8 +21,8 @@ else
 	# whenever the repo's library is updated, the user's local library is updated as well.
 	# This is very important because Arduino demands that library files are in one place
 	# Which is very annoying, but it's a fair trade off as the tool chain #justWorks
-	ln -fs $PWD/dependencies/libs/SB_Servo/SB_Servo.hpp ~/Arduino/libraries/SB_Servo/SB_Servo.hpp
-	ln -fs $PWD/dependencies/libs/SB_Servo/SB_Servo.cpp ~/Arduino/libraries/SB_Servo/SB_Servo.cpp
+	ln -fs $PWD/dependencies/libs/SB_Servo/src/SB_Servo.hpp ~/Arduino/libraries/SB_Servo/SB_Servo.hpp
+	ln -fs $PWD/dependencies/libs/SB_Servo/src/SB_Servo.cpp ~/Arduino/libraries/SB_Servo/SB_Servo.cpp
 fi
 
 
