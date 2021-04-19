@@ -39,7 +39,7 @@ Since traditional testing in C++ using the Catch framework is a little awkward, 
 > `testRotateTo` -- /ditto/
 > `testTwoServos` -- just ensures nothing funky happens when we use more than one servo
 
-##Error codes
+## Error codes
 
 
 Error codes are used by the class to signify something has gone wrong.
