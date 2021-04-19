@@ -34,9 +34,13 @@ On Windows, find the two directories, `PololuMaestro` and `SB_Servo` in `arduino
 Since traditional testing in C++ using the Catch framework is a little awkward, the current approach is to simply run various Arduino programs and ensure the correct outputs are presented on the Serial monitor. The current scripts directories for testing are located in `arduino-sailbot-20/main/Motors/testing`
 
 > `testBounds` -- tests going over and under the correct limits and that the correct limits & error codes result
+> 
 > `testErrorCodes` -- ensure all the correct error codes occur
+> 
 > `testRotateBy` -- tests the `rotateBy()` method
+> 
 > `testRotateTo` -- /ditto/
+> 
 > `testTwoServos` -- just ensures nothing funky happens when we use more than one servo
 
 ## Error codes
