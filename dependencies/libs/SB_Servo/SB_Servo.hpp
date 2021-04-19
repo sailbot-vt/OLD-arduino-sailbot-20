@@ -38,8 +38,6 @@
 #define CHANNEL_ERROR_BIT 0x08
 #define ROTATE_TO_UNDER_ERROR_BIT 0x10
 #define ROTATE_TO_OVER_ERROR_BIT 0x20
-#define ROTATE_BY_OVER_ERROR_BIT 0x40
-#define ROTATE_BY_UNDER_ERROR_BIT 0x80
 
 /**
  * These are default values for instantiated servos

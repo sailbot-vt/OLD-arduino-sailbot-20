@@ -154,29 +154,9 @@ void SB_Servo::rotateToDegrees(float degree) {
 
 
 void SB_Servo::rotateBy(float degreesBy) { 
-	float currentDeg;
-	checkChannel();
-	if (errorCode & CHANNEL_ERROR_BIT) { 
-		printDebug("Bad channel num, aborting rotateBy()"); 
-		return; // Servo not connected yet 
-	} 
 	currentDeg = (int) (getCurrentDegrees() + .5); // Round down to make life easier and stop errors
 	float desiredAngle = currentDeg + degreesBy;	
-	if (desiredAngle > maxAngle) { 
-		errorCode |= ROTATE_BY_OVER_ERROR_BIT;
-		printDebug("Requested rotateBy() angle over rating warning, defaulting");
-		desiredAngle = maxAngle;
-	} else if (desiredAngle < minAngle) { 
-		errorCode |= ROTATE_BY_UNDER_ERROR_BIT;
-		printDebug("Requested rotateBy() angle under rating warning, defaulting");
-		desiredAngle = minAngle;
-	}
-	// Don't need to check this. 
-	// us can't be calculated outside of tolerable range
-	// max / min us also should not be used for bounds checking because they most likely
-	// exceed what the angle allows for 
-	int desiredUS = degToUS(desiredAngle); 
-	maestro.setTarget(channelNum, desiredUS);
+	rotateToDegrees(desiredAngle);
 }
 
 void SB_Servo::printDebug(String printMe) { 

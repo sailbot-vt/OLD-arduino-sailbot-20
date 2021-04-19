@@ -33,4 +33,36 @@ On Windows, find the two directories, `PololuMaestro` and `SB_Servo` in `arduino
 ## Testing:
 Since traditional testing in C++ using the Catch framework is a little awkward, the current approach is to simply run various Arduino programs and ensure the correct outputs are presented on the Serial monitor. The current scripts directories for testing are located in `arduino-sailbot-20/main/Motors/testing`
 
-> `testConversions` -- tests Applying a few different values from 0 to 180 for the maestro to write to the servo, and prints to serial monitor the results 
+> `testBounds` -- tests going over and under the correct limits and that the correct limits & error codes result
+> `testErrorCodes` -- ensure all the correct error codes occur
+> `testRotateBy` -- tests the `rotateBy()` method
+> `testRotateTo` -- /ditto/
+> `testTwoServos` -- just ensures nothing funky happens when we use more than one servo
+
+##Error codes
+
+
+Error codes are used by the class to signify something has gone wrong.
+The SB_Servo class contains a member integer called `errorCode` whose bits are flipped to indicate
+a specific error has occured. The table below outlines the bits and what they mean
+
+The first 4 bits in the error code is reserved for configuration errors, while
+the second 4 bits is for movement errors (requesting movement out of bounds)
+
+ Error | Hex Value |
+| --- 	| --- |
+|Bad us configuration | 0x01 | 
+|Bad Range configuration | 0x02 | 
+|Bad Angle configuration | 0x04 | 
+|Bad channel Number configuration | 0x08 | 
+|Requested rotation under alotted range| 0x10 | 
+|Requested rotation over alotted range| 0x20 | 
+
+
+
+
+
+
+
+
+
