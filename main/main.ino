@@ -25,6 +25,5 @@ void loop(void)
     refTime = curTime;
     Serial.println(CH2.pwmValue);
     Serial.println(CH3.pwmValue); 
-    //comment
   }
 }
